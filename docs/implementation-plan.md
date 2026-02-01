@@ -143,17 +143,22 @@
 
 ### Frontend
 
-**Framework**: React or Vue.js (with PWA support)
-- React: Use Create React App with PWA template or Vite
-- Vue: Use Vue CLI with PWA plugin or Vite
+**Framework**: Nuxt 4.3
+- Vue 3 based meta-framework with PWA support
+- Server-side rendering (SSR) and static generation (SSG) capabilities
+- Built-in routing and state management
+- Vite-powered for fast development
 
-**State Management**: Redux or Vuex (for offline state)
+**State Management**: Pinia (Nuxt 3+ recommended)
 - Maintain app state for offline operations
 - Persist state to IndexDB
+- Type-safe stores
 
-**UI Components**: Material-UI or Vuetify
+**UI Components**: shadcn-vue
+- Accessible and customizable components
+- Built with Radix Vue and Tailwind CSS
 - Mobile-first responsive design
-- Consistent component library
+- Copy-paste component approach
 
 **Charts**: Chart.js or D3.js
 - Financial reports and visualizations
@@ -181,21 +186,24 @@
 
 ### Build & Development
 
-**Build Tool**: Vite or Webpack
-- Vite: Faster dev builds, modern default
-- Webpack: More mature, extensive plugins
+**Build Tool**: Vite (via Nuxt 4.3)
+- Fast HMR (Hot Module Replacement)
+- Built-in with Nuxt
+- Optimized production builds
 
-**Testing**: Jest + Testing Library
-- Unit tests: Jest
-- Component tests: React Testing Library / Vue Testing Library
+**Testing**: Vitest + Testing Library
+- Unit tests: Vitest (Vite-native test runner)
+- Component tests: Vue Testing Library
 - E2E tests: Playwright or Cypress
 
 **Linting**: ESLint + Prettier
+- Nuxt ESLint module
 - Consistent code style
 - Catch errors early
 
-**TypeScript**: Recommended for type safety
+**TypeScript**: Fully supported in Nuxt 4.3
 - Type-safe data models
+- Auto-generated types
 - Better IDE support
 - Catch errors at compile time
 
@@ -648,25 +656,29 @@ class BalanceCache {
 
 ### Virtual Scrolling for Long Lists
 
-```javascript
-// Use react-window or vue-virtual-scroller
-import { FixedSizeList } from 'react-window';
+```vue
+<script setup lang="ts">
+// Use vue-virtual-scroller for Nuxt/Vue
+import { RecycleScroller } from 'vue-virtual-scroller';
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
-function TransactionList({ transactions }) {
-  return (
-    <FixedSizeList
-      height={600}
-      itemCount={transactions.length}
-      itemSize={80}
-    >
-      {({ index, style }) => (
-        <div style={style}>
-          <TransactionItem transaction={transactions[index]} />
-        </div>
-      )}
-    </FixedSizeList>
-  );
-}
+defineProps<{
+  transactions: Transaction[]
+}>();
+</script>
+
+<template>
+  <RecycleScroller
+    :items="transactions"
+    :item-size="80"
+    class="h-[600px]"
+    key-field="id"
+  >
+    <template #default="{ item }">
+      <TransactionItem :transaction="item" />
+    </template>
+  </RecycleScroller>
+</template>
 ```
 
 ---

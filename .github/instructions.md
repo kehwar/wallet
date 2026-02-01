@@ -58,11 +58,11 @@ All entities use UUID v4 for:
 ## Development Guidelines
 
 ### Technology Choices
-- **Frontend**: React/Vue with PWA support
+- **Framework**: Nuxt 4.3 with PWA support
+- **UI Components**: shadcn-vue
 - **Storage**: IndexDB (via Dexie.js or idb wrapper)
 - **Sync**: Firebase JS SDK (optional, user-configured)
 - **Math**: decimal.js or big.js (avoid floating point errors)
-- **Build**: Vite or Webpack with PWA plugin
 
 ### Validation Rules
 - Debits must equal credits (tolerance: 0.01)

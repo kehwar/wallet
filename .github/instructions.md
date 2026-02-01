@@ -324,7 +324,7 @@ _version: Monotonically increasing version number
 
 **Upload (Local -> Cloud):**
 ```
-1. Query unsyncedrecords from IndexDB (syncedAt is null or < updatedAt)
+1. Query unsynced records from IndexDB (syncedAt is null or < updatedAt)
 2. Batch upload to Firestore
 3. On success: Update syncedAt timestamp
 4. On failure: Retry with exponential backoff

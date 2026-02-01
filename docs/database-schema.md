@@ -321,7 +321,7 @@ Tolerance: ±0.01 (to handle rounding in multi-currency scenarios)
 For each ledger entry:
 - `amount_display` is the source of truth for zero-sum validation
 - `amount_account = amount_display * rate_display_to_account`
-- `amount_budget = amount_display * rate_display_to_budget` (if budget_id present)
+- `amount_budget = amount_display * rate_display_to_budget` (if `budget_id` and `rate_display_to_budget` are present)
 
 ### Referential Integrity
 

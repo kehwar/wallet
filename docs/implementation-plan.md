@@ -260,18 +260,7 @@ import Dexie from 'dexie';
 
 const db = new Dexie('wallet_db');
 db.version(1).stores({
-  ledger_entries: `
-    id,
-    transaction_id,
-    date,
-    status,
-    updated_at,
-    account_id,
-    budget_id,
-    [account_id+date],
-    [budget_id+date],
-    [transaction_id+idx]
-  `,
+  ledger_entries: 'id, transaction_id, date, status, updated_at, account_id, budget_id, [account_id+date], [budget_id+date], [transaction_id+idx]',
   accounts: 'id, updated_at',
   budgets: 'id, updated_at',
   rates: 'id, date, updated_at',

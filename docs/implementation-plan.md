@@ -765,11 +765,10 @@ defineProps<{
 ### GitHub Pages Setup
 
 **Static Generation with Nuxt 4.3:**
-```bash
-# nuxt.config.ts
+```typescript
+// nuxt.config.ts
 export default defineNuxtConfig({
   ssr: false, // Static generation only
-  target: 'static',
   
   // GitHub Pages base path (if using repository pages)
   app: {
@@ -823,7 +822,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
       
       - name: Install dependencies
         run: npm ci

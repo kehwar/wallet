@@ -145,7 +145,7 @@
 
 **Framework**: Nuxt 4.3
 - Vue 3 based meta-framework with PWA support
-- Server-side rendering (SSR) and static generation (SSG) capabilities
+- Static site generation (SSG) for GitHub Pages deployment
 - Built-in routing and state management
 - Vite-powered for fast development
 
@@ -191,10 +191,10 @@
 - Built-in with Nuxt
 - Optimized production builds
 
-**Testing**: Vitest + Testing Library
+**Testing**: Vitest + Playwright
 - Unit tests: Vitest (Vite-native test runner)
-- Component tests: Vue Testing Library
-- E2E tests: Playwright or Cypress
+- Component tests: Vue Testing Library with Vitest
+- E2E tests: Playwright
 
 **Linting**: ESLint + Prettier
 - Nuxt ESLint module
@@ -495,6 +495,78 @@ function validateAccount(account) {
 
 ## Testing Strategy
 
+### Test Configuration
+
+**Vitest Setup (vitest.config.ts):**
+```typescript
+import { defineConfig } from 'vitest/config'
+import vue from '@vitejs/plugin-vue'
+
+export default defineConfig({
+  plugins: [vue()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        '.nuxt/',
+        '.output/',
+      ],
+    },
+  },
+})
+```
+
+**Playwright Setup (playwright.config.ts):**
+```typescript
+import { defineConfig, devices } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  
+  use: {
+    baseURL: 'http://localhost:3000',
+    trace: 'on-first-retry',
+  },
+  
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
+  ],
+  
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+  },
+})
+```
+
 ### Unit Tests
 
 ```javascript
@@ -541,17 +613,22 @@ describe('IndexDB Operations', () => {
 });
 ```
 
-### E2E Tests
+### E2E Tests (Playwright)
 
-```javascript
+```typescript
 // Example: Test offline transaction creation
-test('creates transaction offline and syncs when online', async () => {
+import { test, expect } from '@playwright/test'
+
+test('creates transaction offline and syncs when online', async ({ page, context }) => {
   // Go offline
-  await page.setOfflineMode(true);
+  await context.setOffline(true);
+  
+  // Navigate to app
+  await page.goto('/');
   
   // Create transaction
   await page.fill('#amount', '100');
-  await page.select('#account', 'cash');
+  await page.selectOption('#account', 'cash');
   await page.click('#submit');
   
   // Verify in IndexDB
@@ -561,7 +638,7 @@ test('creates transaction offline and syncs when online', async () => {
   expect(entries.length).toBe(2);
   
   // Go online
-  await page.setOfflineMode(false);
+  await context.setOffline(false);
   await page.waitForSelector('.sync-complete');
   
   // Verify synced
@@ -683,6 +760,86 @@ defineProps<{
 
 ---
 
+## Deployment Configuration
+
+### GitHub Pages Setup
+
+**Static Generation with Nuxt 4.3:**
+```bash
+# nuxt.config.ts
+export default defineNuxtConfig({
+  ssr: false, // Static generation only
+  target: 'static',
+  
+  // GitHub Pages base path (if using repository pages)
+  app: {
+    baseURL: process.env.NODE_ENV === 'production' 
+      ? '/wallet/' 
+      : '/',
+  },
+  
+  // PWA configuration
+  modules: ['@vite-pwa/nuxt'],
+  
+  pwa: {
+    registerType: 'autoUpdate',
+    manifest: {
+      name: 'Wallet PWA',
+      short_name: 'Wallet',
+      theme_color: '#ffffff',
+      background_color: '#ffffff',
+      display: 'standalone',
+    },
+    workbox: {
+      navigateFallback: '/',
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+    },
+  },
+})
+```
+
+**Build and Deploy:**
+```bash
+# Generate static files
+npm run generate
+
+# Files will be in .output/public directory
+# Deploy to GitHub Pages via GitHub Actions or manually
+```
+
+**GitHub Actions Workflow:**
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Generate static site
+        run: npm run generate
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./.output/public
+```
+
+---
+
 ## Deployment Checklist
 
 ### Pre-Launch
@@ -696,8 +853,8 @@ defineProps<{
 - [ ] User feedback incorporated (beta testing)
 
 ### Launch
-- [ ] Deploy to production hosting (Netlify, Vercel, Firebase Hosting)
-- [ ] Configure CDN for static assets
+- [ ] Deploy to GitHub Pages (static site generation)
+- [ ] Configure custom domain (optional)
 - [ ] Set up monitoring (Sentry, LogRocket)
 - [ ] Enable error tracking
 - [ ] Configure analytics (optional, with user consent)

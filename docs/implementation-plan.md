@@ -255,43 +255,64 @@ workbox.backgroundSync.registerQueue('syncQueue');
 ### IndexDB Implementation
 
 **Initialization:**
-```javascript
+```typescript
 import Dexie from 'dexie';
 
 const db = new Dexie('wallet_db');
 db.version(1).stores({
-  ledger: 'id, transactionId, accountId, date, _lww_timestamp',
-  accounts: 'id, type, parent_id, _lww_timestamp',
-  transactions: 'id, date, category, _lww_timestamp',
-  exchange_rates: 'id, base_currency, target_currency, valid_from',
-  sync_metadata: 'id, entity_type, entity_id, _lww_timestamp'
+  ledger_entries: `
+    id,
+    transaction_id,
+    date,
+    status,
+    updated_at,
+    account_id,
+    budget_id,
+    [account_id+date],
+    [budget_id+date],
+    [transaction_id+idx]
+  `,
+  accounts: 'id, updated_at',
+  budgets: 'id, updated_at',
+  rates: 'id, date, updated_at',
+  rules: 'id, updated_at'
 });
 ```
 
 **CRUD Operations:**
-```javascript
-// Create with LWW metadata
-async function createLedgerEntry(entry) {
-  entry._lww_timestamp = Date.now();
-  entry._device_id = getDeviceId();
-  entry._version = 1;
-  entry.syncedAt = null;
+```typescript
+// Create ledger entry with sync metadata
+async function createLedgerEntry(entry: Partial<LedgerEntry>) {
+  const now = new Date().toISOString();
   
-  await db.ledger.add(entry);
-  queueForSync(entry);
+  const newEntry: LedgerEntry = {
+    ...entry,
+    id: entry.id || crypto.randomUUID(),
+    created_at: now,
+    updated_at: now,
+  } as LedgerEntry;
+  
+  await db.ledger_entries.add(newEntry);
+  queueForSync(newEntry);
+  
+  return newEntry;
 }
 
-// Update with LWW metadata
-async function updateLedgerEntry(id, changes) {
-  const entry = await db.ledger.get(id);
+// Update ledger entry
+async function updateLedgerEntry(id: string, changes: Partial<LedgerEntry>) {
+  const entry = await db.ledger_entries.get(id);
+  if (!entry) throw new Error('Entry not found');
   
-  entry._lww_timestamp = Date.now();
-  entry._version += 1;
-  entry.syncedAt = null;
-  Object.assign(entry, changes);
+  const updated: LedgerEntry = {
+    ...entry,
+    ...changes,
+    updated_at: new Date().toISOString(),
+  };
   
-  await db.ledger.put(entry);
-  queueForSync(entry);
+  await db.ledger_entries.put(updated);
+  queueForSync(updated);
+  
+  return updated;
 }
 ```
 
@@ -333,42 +354,63 @@ service cloud.firestore {
 
 ### Conflict Resolution Logic
 
-```javascript
-function resolveConflict(local, remote) {
-  // Compare timestamps
-  if (local._lww_timestamp > remote._lww_timestamp) {
+```typescript
+function resolveConflict(local: LedgerEntry, remote: LedgerEntry): 'local' | 'remote' {
+  // Compare updated_at timestamps (ISO8601 strings compare correctly)
+  if (local.updated_at > remote.updated_at) {
     return 'local';
-  } else if (remote._lww_timestamp > local._lww_timestamp) {
+  } else if (remote.updated_at > local.updated_at) {
     return 'remote';
   }
   
-  // Tie-breaker: version
-  if (local._version > remote._version) {
-    return 'local';
-  } else if (remote._version > local._version) {
-    return 'remote';
-  }
-  
-  // Tie-breaker: device_id (lexicographic)
-  return local._device_id > remote._device_id ? 'local' : 'remote';
+  // Exact tie (rare): Accept remote
+  return 'remote';
 }
 ```
 
 ### Sync Flow
 
 **Upload (Local -> Cloud):**
-```javascript
-async function uploadChanges() {
-  // Get all unsynced entries
-  const unsynced = await db.ledger
-    .where('syncedAt')
-    .equals(null)
+```typescript
+async function uploadChanges(lastSyncTime: string) {
+  // Get all entries modified since last sync
+  const toUpload = await db.ledger_entries
+    .where('updated_at')
+    .above(lastSyncTime)
     .toArray();
   
-  for (const entry of unsynced) {
-    await setDoc(doc(firestore, `users/${userId}/ledger/${entry.id}`), entry);
-    entry.syncedAt = new Date().toISOString();
-    await db.ledger.put(entry);
+  for (const entry of toUpload) {
+    await setDoc(
+      doc(firestore, `users/${userId}/ledger_entries/${entry.id}`), 
+      entry
+    );
+  }
+}
+```
+
+**Download (Cloud -> Local):**
+```typescript
+async function downloadChanges(lastSyncTime: string) {
+  const firestoreQuery = query(
+    collection(firestore, `users/${userId}/ledger_entries`),
+    where('updated_at', '>', lastSyncTime)
+  );
+  
+  const snapshot = await getDocs(firestoreQuery);
+  
+  for (const docSnap of snapshot.docs) {
+    const remote = docSnap.data() as LedgerEntry;
+    const local = await db.ledger_entries.get(remote.id);
+    
+    if (!local || resolveConflict(local, remote) === 'remote') {
+      await db.ledger_entries.put(remote);
+    } else {
+      // Local wins, re-upload
+      await setDoc(
+        doc(firestore, `users/${userId}/ledger_entries/${remote.id}`),
+        local
+      );
+    }
   }
 }
 ```
@@ -431,33 +473,37 @@ async function syncTransaction(transactionId) {
 
 ### Transaction Validation
 
-```javascript
-function validateTransaction(transaction, entries) {
+```typescript
+async function validateTransaction(transaction_id: string, entries: LedgerEntry[]) {
   // Must have at least 2 entries
   if (entries.length < 2) {
     throw new Error('Transaction must have at least 2 ledger entries');
   }
   
-  // Calculate sums
-  const debits = entries
-    .filter(e => e.type === 'debit')
-    .reduce((sum, e) => sum.add(new Decimal(e.accountAmount)), new Decimal(0));
+  // Calculate sum of display amounts (must equal zero)
+  const sum = entries.reduce((total, e) => 
+    total.add(new Decimal(e.amount_display)), 
+    new Decimal(0)
+  );
   
-  const credits = entries
-    .filter(e => e.type === 'credit')
-    .reduce((sum, e) => sum.add(new Decimal(e.accountAmount)), new Decimal(0));
-  
-  // Must balance (within tolerance)
-  const diff = debits.minus(credits).abs();
-  if (diff.greaterThan(0.01)) {
-    throw new Error(`Transaction unbalanced: debits=${debits}, credits=${credits}`);
+  // Must balance to zero (within tolerance)
+  if (sum.abs().greaterThan(0.01)) {
+    throw new Error(`Transaction unbalanced: sum=${sum.toString()}, expected 0`);
   }
   
   // All accounts must exist
   for (const entry of entries) {
-    const account = await db.accounts.get(entry.accountId);
+    const account = await db.accounts.get(entry.account_id);
     if (!account) {
-      throw new Error(`Account ${entry.accountId} not found`);
+      throw new Error(`Account ${entry.account_id} not found`);
+    }
+    
+    // If budget_id present, must exist
+    if (entry.budget_id) {
+      const budget = await db.budgets.get(entry.budget_id);
+      if (!budget) {
+        throw new Error(`Budget ${entry.budget_id} not found`);
+      }
     }
   }
   

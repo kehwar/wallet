@@ -2,224 +2,106 @@
 
 **MODE: PLAN** - This document specifies the database schema for the wallet PWA.
 
-## Overview
+## Architecture Overview
+
+**Data Plane Specification**
+- Architecture: Local-First (IndexDB/Dexie) + Firestore Sync
+- Pattern: Denormalized Double-Entry Ledger
+- Core Principle: The Ledger Entry is the atomic unit; no separate Transaction documents
 
 The wallet uses a denormalized schema with UUID-based entities for offline-first operation. Data is stored locally in IndexDB and optionally synced to user's Firestore instance.
 
 ---
 
-## IndexDB Schema (Local Storage)
+## Core Types
 
-### Object Stores
-
+```typescript
+type TransactionStatus = 'projected' | 'confirmed';
+type AccountType = 'asset' | 'liability' | 'income' | 'expense' | 'equity';
+type CurrencyCode = string; // e.g., "USD", "PEN", "EUR"
+type UUID = string;         // UUID v4
+type ISODate = string;      // "2026-02-01T14:30:00.000Z"
 ```
-Database: wallet_db
-
-Stores:
-- ledger: Main ledger entries (denormalized for performance)
-- accounts: Chart of accounts
-- transactions: Transaction metadata
-- exchange_rates: Historical exchange rate snapshots
-- sync_metadata: Last-Write-Wins timestamps and sync state
-```
-
-### Indexes
-
-**ledger store:**
-- Primary key: `id` (UUID)
-- Index: `transactionId`
-- Index: `accountId`
-- Index: `date`
-- Index: `_lww_timestamp`
-
-**accounts store:**
-- Primary key: `id` (UUID)
-- Index: `type`
-- Index: `parent_id`
-- Index: `_lww_timestamp`
-
-**transactions store:**
-- Primary key: `id` (UUID)
-- Index: `date`
-- Index: `category`
-- Index: `_lww_timestamp`
-
-**exchange_rates store:**
-- Primary key: `id` (UUID)
-- Index: `base_currency`
-- Index: `target_currency`
-- Index: `valid_from`
-
-**sync_metadata store:**
-- Primary key: `id` (UUID)
-- Index: `syncedAt`
-- Index: `_lww_timestamp`
-
----
-
-## Firestore Schema (Cloud Sync - BYOB)
-
-### Collections
-
-```
-users/{userId}/
-  ├── ledger/{entryId}
-  ├── accounts/{accountId}
-  ├── transactions/{txId}
-  ├── rates/{rateId}
-  └── sync/{docId}
-```
-
-All documents use the same structure as IndexDB, enabling direct sync.
 
 ---
 
 ## Data Models
 
-### Ledger Entry (Denormalized)
+### Ledger Entry (The Atomic Unit)
 
-**Purpose**: Core double-entry accounting record with full currency context.
+**Purpose**: The fundamental building block. Individual splits that share a `transaction_id` form a complete transaction. No separate Transaction document exists.
 
-```javascript
-{
-  // Identity
-  id: UUID (v4),
-  transactionId: UUID,
-  accountId: UUID,
-  date: ISO8601 timestamp,
-  type: 'debit' | 'credit',
-  
-  // Triple Truth System - Display Currency
-  displayAmount: Number,
-  displayCurrency: String,
-  
-  // Triple Truth System - Account Currency
-  accountAmount: Number,
-  accountCurrency: String,
-  
-  // Triple Truth System - Budget Currency
-  budgetAmount: Number,
-  budgetCurrency: String,
-  
-  // Frozen Exchange Rates at transaction time
-  frozenRates: {
-    displayToAccount: Number,
-    displayToBudget: Number,
-    accountToBudget: Number,
-    timestamp: ISO8601
-  },
-  
-  // Descriptive
-  description: String,
-  metadata: Object,
-  
-  // LWW Conflict Resolution
-  _lww_timestamp: Number (epoch ms),
-  _device_id: UUID,
-  _version: Number,
-  
-  // Timestamps
-  createdAt: ISO8601,
-  updatedAt: ISO8601,
-  syncedAt: ISO8601 | null
+```typescript
+interface LedgerEntry {
+  // === Identity & Sequencing ===
+  id: UUID;                 // Primary Key
+  transaction_id: UUID;     // Foreign Key: Links splits together
+  idx: number;              // 0, 1, 2... Preserves visual order of splits
+
+  // === Header Data (Denormalized - repeated on every split) ===
+  date: ISODate;            // User-defined date
+  description: string;      // e.g., "Grocery Run"
+  status: TransactionStatus; // 'projected' | 'confirmed'
+  recurring_rule_id?: UUID | null; // Linked if auto-generated
+  search_tags?: string[];   // For fuzzy search optimization
+
+  // === The Financial "Triple Truth" ===
+  // 1. DISPLAY (The Receipt) - Used for Zero-Sum Validation
+  currency_display: CurrencyCode;
+  amount_display: number;     // Signed (+/-). Sum of group must be 0.
+
+  // 2. ACCOUNT (The Bank) - Used for Account Balances
+  account_id: UUID;
+  amount_account: number;     // Converted to Account's currency
+  rate_display_to_account: number; // Frozen exchange rate used
+
+  // 3. BUDGET (The Plan) - Used for Budget Availability
+  budget_id?: UUID | null;    // Optional "Cost Center"
+  amount_budget: number | null; // Converted to Budget's currency
+  rate_display_to_budget: number | null; // Frozen exchange rate used
+
+  // === Metadata (Sync logic) ===
+  created_at: ISODate;      // Immutable system time
+  updated_at: ISODate;      // Used for LWW (Last Write Wins) sync
 }
 ```
 
 **Key Properties:**
 - `id`: Globally unique identifier (UUID v4)
-- `type`: Either 'debit' or 'credit'
-- `*Amount/*Currency`: Three complete currency representations
-- `frozenRates`: Exchange rates at transaction time (immutable)
-- `_lww_timestamp`: Milliseconds since epoch for conflict resolution
-- `_device_id`: Originating device UUID
-- `_version`: Monotonically increasing version number
+- `transaction_id`: Groups multiple splits into a logical transaction
+- `idx`: Order index for displaying splits in UI (0, 1, 2...)
+- `status`: Distinguishes between projected (forecasted) and confirmed (actual) transactions
+- `amount_display`: Signed amount (+/-) where sum of all splits in a transaction must equal 0
+- `rate_*`: Frozen exchange rates at transaction time (immutable)
+- `updated_at`: Timestamp for Last-Write-Wins conflict resolution
 
 **Validation Rules:**
-- All amounts must be positive numbers
-- Currency codes must be valid ISO 4217
-- `accountId` and `transactionId` must reference existing records
-- `type` must be exactly 'debit' or 'credit'
-- `_lww_timestamp` must be non-negative integer
-- `_version` must be positive integer
-
----
-
-### Transaction (Parent Record)
-
-**Purpose**: Groups ledger entries and provides metadata.
-
-```javascript
-{
-  // Identity
-  id: UUID,
-  date: ISO8601,
-  
-  // Descriptive
-  description: String,
-  category: String,
-  tags: String[],
-  attachments: String[],
-  
-  // Status
-  status: 'pending' | 'cleared' | 'reconciled',
-  
-  // LWW Metadata
-  _lww_timestamp: Number,
-  _device_id: UUID,
-  _version: Number,
-  
-  // Timestamps
-  createdAt: ISO8601,
-  updatedAt: ISO8601
-}
-```
-
-**Key Properties:**
-- `status`: Transaction lifecycle state
-  - `pending`: Unconfirmed transaction
-  - `cleared`: Confirmed but not reconciled
-  - `reconciled`: Verified against bank statement (immutable)
-- `tags`: Array of user-defined tags for categorization
-- `attachments`: Array of file references (receipts, invoices)
-
-**Validation Rules:**
-- Must have at least 2 related ledger entries
-- Related ledger entries must balance (debits = credits)
-- Once `reconciled`, cannot be modified (create correcting entries)
-- `date` cannot be in future for cleared/reconciled transactions
+- All entries with same `transaction_id` must sum to zero: `SUM(amount_display) = 0`
+- Amounts can be positive or negative (signed values)
+- Exchange rates must be positive numbers
+- `account_id` must reference existing account
+- `budget_id` is optional (can be null)
+- `idx` must be sequential within transaction group (0, 1, 2...)
 
 ---
 
 ### Account
 
-**Purpose**: Chart of accounts entity.
+**Purpose**: Represents financial accounts (bank accounts, credit cards, etc.).
 
-```javascript
-{
-  // Identity
-  id: UUID,
-  name: String,
-  type: 'asset' | 'liability' | 'equity' | 'income' | 'expense',
-  currency: String (ISO 4217),
+```typescript
+interface Account {
+  id: UUID;
+  name: string;             // e.g., "Chase Sapphire"
+  type: AccountType;        // 'asset' | 'liability' | 'income' | 'expense' | 'equity'
+  currency: CurrencyCode;   // Immutable after creation
   
-  // Hierarchy
-  parent_id: UUID | null,
+  // Logic Flags
+  include_in_net_worth: boolean; // False for "Budget Exchange" accounts
+  is_system_default: boolean;    // True for "Ready to Assign"
+  is_archived: boolean;
   
-  // Status
-  is_active: Boolean,
-  
-  // Balance (calculated, not stored in production)
-  opening_balance: Number,
-  current_balance: Number, // Runtime only, not persisted
-  
-  // LWW Metadata
-  _lww_timestamp: Number,
-  _device_id: UUID,
-  _version: Number,
-  
-  // Timestamps
-  createdAt: ISO8601,
-  updatedAt: ISO8601
+  updated_at: ISODate;
 }
 ```
 
@@ -230,154 +112,278 @@ All documents use the same structure as IndexDB, enabling direct sync.
 - `income`: Money earned
 - `expense`: Money spent
 
-**Hierarchy:**
-- Accounts can have parent accounts for categorization
-- Example: `Expenses:Groceries` where `Expenses` is parent
-- `parent_id` is null for root accounts
+**Logic Flags:**
+- `include_in_net_worth`: When false, account is excluded from net worth calculations (useful for virtual/system accounts)
+- `is_system_default`: Marks special system accounts like "Ready to Assign"
+- `is_archived`: Soft delete flag; archived accounts hidden from UI but data preserved
 
 **Validation Rules:**
-- Account names must be unique within same parent
-- `currency` must be valid ISO 4217 code
-- Circular parent references not allowed
-- Cannot delete accounts with existing ledger entries (soft delete via `is_active`)
+- Account names should be unique (recommended, not enforced)
+- `currency` is immutable after creation (prevents data corruption)
+- Cannot delete accounts with existing ledger entries (use `is_archived`)
+- `type` must be one of the five valid AccountType values
 
 ---
 
-### Exchange Rate Snapshot
+### Budget
 
-**Purpose**: Historical exchange rate tracking.
+**Purpose**: Represents budget categories or cost centers for tracking spending against targets.
 
-```javascript
-{
-  // Identity
-  id: UUID,
+```typescript
+interface Budget {
+  id: UUID;
+  name: string;             // e.g., "Groceries"
+  currency: CurrencyCode;   // Immutable
+  period: 'monthly' | 'weekly' | 'yearly' | 'custom';
+  target_amount?: number;   // Optional goal
   
-  // Rate Definition
-  base_currency: String,
-  target_currency: String,
-  rate: Number,
-  
-  // Metadata
-  source: 'manual' | 'api' | 'system',
-  valid_from: ISO8601,
-  valid_to: ISO8601 | null,
-  
-  // Timestamp
-  createdAt: ISO8601
+  is_archived: boolean;
+  updated_at: ISODate;
 }
 ```
 
 **Key Properties:**
-- `rate`: Conversion rate (1 base_currency = rate target_currency)
-- `source`: How the rate was obtained
-  - `manual`: User-entered
-  - `api`: Fetched from external service
-  - `system`: System-calculated
-- `valid_from`: When this rate becomes active
-- `valid_to`: When this rate expires (null = current/indefinite)
+- `period`: Defines budget reset frequency
+- `target_amount`: Optional spending target/goal for the period
+- Budget tracking is done by querying ledger entries with matching `budget_id`
 
 **Validation Rules:**
-- `rate` must be positive number
-- Currency codes must be valid ISO 4217
-- `valid_from` must be before `valid_to`
-- Cannot have overlapping validity periods for same currency pair
-
-**Rate Lookup Logic:**
-1. Query rates where base/target match
-2. Filter by validity period (valid_from <= transaction_date < valid_to)
-3. Order by valid_from DESC
-4. Take most recent rate
+- `currency` is immutable after creation
+- `target_amount` must be positive if provided
+- Cannot delete budgets with existing ledger entries (use `is_archived`)
 
 ---
 
-### Sync Metadata
+### Exchange Rate
 
-**Purpose**: Track sync state for Last-Write-Wins resolution.
+**Purpose**: Historical exchange rate tracking with date-based lookup.
 
-```javascript
-{
-  id: UUID,
-  entity_type: 'ledger' | 'account' | 'transaction' | 'rate',
-  entity_id: UUID,
-  last_synced_version: Number,
-  sync_status: 'pending' | 'syncing' | 'synced' | 'conflict',
-  conflict_data: Object | null,
-  
-  _lww_timestamp: Number,
-  updatedAt: ISO8601
+```typescript
+interface ExchangeRate {
+  id: string;               // Composite: "USD_PEN_2026-02-01"
+  from: CurrencyCode;
+  to: CurrencyCode;
+  rate: number;
+  date: string;             // YYYY-MM-DD
+  source: 'manual' | 'api';
+  updated_at: ISODate;
 }
 ```
 
-**Sync Status:**
-- `pending`: Changes not yet synced
-- `syncing`: Sync in progress
-- `synced`: Successfully synced
-- `conflict`: Conflict detected, needs resolution
+**Key Properties:**
+- `id`: Composite key format ensures uniqueness per currency pair per day
+- `rate`: Conversion rate (1 from = rate to)
+- `source`: Tracks whether rate was user-entered or API-fetched
+- `date`: YYYY-MM-DD format for efficient date-based queries
+
+**Validation Rules:**
+- `rate` must be positive number
+- Currency codes must be valid ISO 4217 (recommended)
+- `from` and `to` must be different currencies
+- Composite ID format: `{from}_{to}_{date}`
+
+**Rate Lookup Logic:**
+1. Query rates where from/to match and date <= transaction_date
+2. Order by date DESC
+3. Take most recent rate
+
+---
+
+### Recurring Rule
+
+**Purpose**: Template for automatic transaction generation based on recurring schedules.
+
+```typescript
+interface RecurringRule {
+  id: UUID;
+  title: string;            // e.g., "Monthly Rent"
+  rrule: string;            // iCal RRULE string
+  template_entries: Partial<LedgerEntry>[]; // JSON template for generation
+  generated_up_to: ISODate; // Checkpoint for projection engine
+  updated_at: ISODate;
+}
+```
+
+**Key Properties:**
+- `rrule`: Standard iCalendar RRULE format for recurrence patterns
+- `template_entries`: Array of partial ledger entry templates (without id, date, created_at)
+- `generated_up_to`: Tracks which dates have been projected to avoid duplicates
+
+**Usage:**
+- Projection engine reads rules and generates `status: 'projected'` entries
+- When user confirms, status changes to `'confirmed'`
+- `generated_up_to` updates as projections are created
+
+---
+
+## IndexDB Schema (Local Storage)
+
+### Dexie.js Schema Definition
+
+```typescript
+// Defines IndexDB structure and indices for performance
+db.version(1).stores({
+  ledger_entries: `
+    id,
+    transaction_id,
+    date,
+    status,
+    updated_at,
+    account_id,
+    budget_id,
+    [account_id+date],     // Index for Account Activity Screens
+    [budget_id+date],      // Index for Budget Reports
+    [transaction_id+idx]   // Index for Transaction Reconstruction
+  `,
+  accounts: 'id, updated_at',
+  budgets: 'id, updated_at',
+  rates: 'id, date, updated_at',
+  rules: 'id, updated_at'
+});
+```
+
+### Object Stores
+
+**Database Name:** `wallet_db`
+
+**Stores:**
+- `ledger_entries`: Main ledger entries (denormalized for performance)
+- `accounts`: Chart of accounts
+- `budgets`: Budget categories and cost centers
+- `rates`: Historical exchange rate snapshots
+- `rules`: Recurring transaction templates
+
+### Indexes
+
+**ledger_entries store:**
+- Primary key: `id` (UUID)
+- Index: `transaction_id` - Groups splits together
+- Index: `date` - Date-based queries and reports
+- Index: `status` - Filter by projected/confirmed
+- Index: `updated_at` - LWW sync logic
+- Index: `account_id` - Account-specific queries
+- Index: `budget_id` - Budget-specific queries
+- Compound index: `[account_id+date]` - Optimized for Account Activity Screens
+- Compound index: `[budget_id+date]` - Optimized for Budget Reports
+- Compound index: `[transaction_id+idx]` - Transaction reconstruction with ordering
+
+**accounts store:**
+- Primary key: `id` (UUID)
+- Index: `updated_at` - Sync logic
+
+**budgets store:**
+- Primary key: `id` (UUID)
+- Index: `updated_at` - Sync logic
+
+**rates store:**
+- Primary key: `id` (composite: "USD_PEN_2026-02-01")
+- Index: `date` - Date-based lookups
+- Index: `updated_at` - Sync logic
+
+**rules store:**
+- Primary key: `id` (UUID)
+- Index: `updated_at` - Sync logic
+
+---
+
+## Firestore Schema (Cloud Sync - BYOB)
+
+### Collections
+
+```
+users/{userId}/
+  ├── ledger_entries/{entryId}
+  ├── accounts/{accountId}
+  ├── budgets/{budgetId}
+  ├── rates/{rateId}
+  └── rules/{ruleId}
+```
+
+All documents use the same structure as IndexDB, enabling direct sync.
+
+**Note**: No separate sync_metadata collection needed. LWW conflict resolution uses the `updated_at` field on each document.
 
 ---
 
 ## Data Integrity Constraints
 
-### Double-Entry Balance
+### Zero-Sum Validation
 
-For each transaction:
+For each transaction (group of entries with same `transaction_id`):
 ```
-SUM(ledger_entries WHERE type='debit' AND transactionId=X) 
-  == 
-SUM(ledger_entries WHERE type='credit' AND transactionId=X)
+SUM(amount_display WHERE transaction_id=X) = 0
 ```
 
-Tolerance: ±0.01 (to handle rounding in multi-currency)
+Tolerance: ±0.01 (to handle rounding in multi-currency scenarios)
 
-### Accounting Equation
+### Triple Truth Consistency
 
-Global constraint:
-```
-SUM(asset_accounts) == SUM(liability_accounts) + SUM(equity_accounts)
-```
+For each ledger entry:
+- `amount_display` is the source of truth for zero-sum validation
+- `amount_account = amount_display * rate_display_to_account`
+- `amount_budget = amount_display * rate_display_to_budget` (if budget_id present)
 
 ### Referential Integrity
 
-- All `ledger.transactionId` must reference existing transaction
-- All `ledger.accountId` must reference existing account
-- All `account.parent_id` must reference existing account or be null
-- No circular parent references
+- All `ledger_entries.account_id` must reference existing account
+- All `ledger_entries.budget_id` must reference existing budget or be null
+- All `ledger_entries.recurring_rule_id` must reference existing rule or be null
 
 ### Immutability Rules
 
-- Reconciled transactions cannot be modified
-- Frozen exchange rates in ledger entries cannot be changed
-- Create correcting/reversing entries instead of modifications
+- `account.currency` cannot be changed after creation
+- `budget.currency` cannot be changed after creation
+- Exchange rates (`rate_*` fields) in ledger entries cannot be changed
+- Use correcting/reversing entries instead of editing confirmed transactions
 
 ---
 
-## Migration Strategy
+## Query Patterns
 
-When schema changes are needed:
+### Common Queries
 
-1. **Version the schema**: Use IndexDB version number
-2. **Provide migration functions**: Transform old data to new structure
-3. **Maintain backwards compatibility**: Support reading old formats
-4. **Sync compatibility**: Firestore schema must match IndexDB
+**1. Get Transaction (reconstruct from splits):**
+```typescript
+const entries = await db.ledger_entries
+  .where('[transaction_id+idx]')
+  .between([txId, Dexie.minKey], [txId, Dexie.maxKey])
+  .toArray();
+```
 
-Example migration:
-```javascript
-// Version 1 -> Version 2: Add budget currency
-if (oldVersion < 2) {
-  const transaction = event.target.transaction;
-  const store = transaction.objectStore('ledger');
-  
-  store.openCursor().onsuccess = (event) => {
-    const cursor = event.target.result;
-    if (cursor) {
-      const entry = cursor.value;
-      entry.budgetAmount = entry.accountAmount;
-      entry.budgetCurrency = DEFAULT_BUDGET_CURRENCY;
-      cursor.update(entry);
-      cursor.continue();
-    }
-  };
-}
+**2. Get Account Activity:**
+```typescript
+const activity = await db.ledger_entries
+  .where('[account_id+date]')
+  .between([accountId, startDate], [accountId, endDate])
+  .toArray();
+```
+
+**3. Get Budget Spending:**
+```typescript
+const spending = await db.ledger_entries
+  .where('[budget_id+date]')
+  .between([budgetId, periodStart], [budgetId, periodEnd])
+  .toArray();
+
+const total = spending.reduce((sum, e) => sum + e.amount_budget, 0);
+```
+
+**4. Calculate Account Balance:**
+```typescript
+const entries = await db.ledger_entries
+  .where('account_id')
+  .equals(accountId)
+  .toArray();
+
+const balance = entries.reduce((sum, e) => sum + e.amount_account, 0);
+```
+
+**5. Filter Projected vs Confirmed:**
+```typescript
+const confirmed = await db.ledger_entries
+  .where('status')
+  .equals('confirmed')
+  .toArray();
 ```
 
 ---
@@ -390,33 +396,92 @@ if (oldVersion < 2) {
 - Fast queries without joins
 - Offline-first queries don't need complex logic
 - Each ledger entry is self-contained
+- Header data (date, description) instantly available without reconstruction
 
 **Costs:**
-- Larger storage footprint
-- Currency display changes require recalculation
-- Account name changes don't propagate automatically
+- Larger storage footprint (header repeated on every split)
+- Updating transaction description requires updating all splits
+- Search tags need to be maintained across all splits
 
-### Query Optimization
+### Caching Strategy
 
-**Common Queries:**
-1. Get account balance: Query ledger by accountId, sum amounts
-2. Get transaction details: Query ledger by transactionId
-3. Date range report: Query ledger by date index
-4. Category spending: Query transactions by category, join ledger
-
-**Caching Strategy:**
-- Cache account balances in memory
-- Invalidate on ledger entry changes
+**Account Balances:**
+- Cache in memory with Map<account_id, balance>
+- Invalidate on any ledger entry change for that account
 - Lazy recalculation on next read
 
-### Index Strategy
+**Budget Availability:**
+- Cache per budget per period
+- Invalidate when period changes or entries added/modified
+- Recalculate on demand
 
-Index frequently queried fields:
-- `ledger.transactionId` - For transaction detail view
-- `ledger.accountId` - For account balance
-- `ledger.date` - For reports and filters
-- `transaction.category` - For category reports
-- `account.type` - For financial statements
+### Indexing Strategy
+
+**Compound Indexes:**
+- `[account_id+date]` enables efficient date-range queries per account
+- `[budget_id+date]` enables efficient period queries per budget
+- `[transaction_id+idx]` ensures split order is maintained efficiently
+
+**Query Optimization:**
+- Use compound indexes for common filter patterns
+- Avoid full table scans by always querying with indexed fields
+- Use Dexie's `.where()` with compound keys for best performance
+
+---
+
+## Sync Strategy
+
+### Last-Write-Wins (LWW) Conflict Resolution
+
+**Metadata Used:**
+- `updated_at`: ISO8601 timestamp of last modification
+
+**Resolution Logic:**
+1. Compare `updated_at` of local vs remote
+2. More recent timestamp wins
+3. On exact tie: Accept remote (rare edge case)
+
+**Sync Flow:**
+1. Query Firestore for documents where `updated_at > last_sync_time`
+2. For each document:
+   - If doesn't exist locally: Insert
+   - If exists and remote is newer: Update local
+   - If exists and local is newer: Re-upload to Firestore
+3. Query local documents where `updated_at > last_sync_time`
+4. Upload to Firestore
+5. Update `last_sync_time` checkpoint
+
+**Transaction Atomicity:**
+When syncing ledger entries, entries with the same `transaction_id` should be synced together as a logical group to maintain zero-sum invariant.
+
+---
+
+## Migration Strategy
+
+When schema changes are needed:
+
+1. **Version the schema**: Use IndexDB version number
+2. **Provide migration functions**: Transform old data to new structure
+3. **Maintain backwards compatibility**: Support reading old formats during transition
+4. **Sync compatibility**: Firestore schema must match IndexDB
+
+Example migration:
+```typescript
+// Version 1 -> Version 2: Add status field
+db.version(2).stores({
+  ledger_entries: `id, transaction_id, date, status, updated_at, account_id, budget_id, [account_id+date], [budget_id+date], [transaction_id+idx]`,
+  accounts: 'id, updated_at',
+  budgets: 'id, updated_at',
+  rates: 'id, date, updated_at',
+  rules: 'id, updated_at'
+}).upgrade(trans => {
+  return trans.ledger_entries.toCollection().modify(entry => {
+    if (!entry.status) {
+      entry.status = 'confirmed'; // Default old entries to confirmed
+    }
+  });
+});
+```
 
 ---
 
@@ -437,8 +502,13 @@ Example Firestore rules:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
+    match /users/{userId}/{collection}/{document} {
       allow read, write: if request.auth.uid == userId;
+      
+      // Additional validation
+      allow write: if request.auth.uid == userId 
+                   && request.resource.data.updated_at is timestamp
+                   && request.resource.data.id is string;
     }
   }
 }
@@ -449,11 +519,14 @@ service cloud.firestore {
 ## Summary
 
 The database schema implements:
-- **UUID-based entities** for offline-first ID generation
-- **Denormalized ledger** for performance and offline capability
-- **Triple Truth** currency representation in every entry
-- **LWW metadata** for conflict resolution
-- **Immutable history** with append-only corrections
-- **IndexDB + Firestore** dual storage strategy
+- **Denormalized Ledger Entries** as atomic units (no separate Transaction documents)
+- **Signed Amounts** (+/-) with zero-sum validation per transaction group
+- **Triple Truth** currency representation (display, account, budget)
+- **Frozen Exchange Rates** for historical accuracy
+- **Status-based Workflow** (projected vs confirmed transactions)
+- **Recurring Rules** for automatic transaction generation
+- **Budget Tracking** as first-class entities
+- **Compound Indexes** for optimized queries
+- **LWW Sync Strategy** using `updated_at` timestamps
 
-This schema supports the core requirements of offline-first operation, strict double-entry accounting, and multi-currency handling with historical accuracy.
+This schema supports the core requirements of offline-first operation, double-entry accounting (via zero-sum validation), multi-currency handling with historical accuracy, and budget tracking.

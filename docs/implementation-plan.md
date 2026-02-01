@@ -329,9 +329,10 @@ const db = getFirestore(app);
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null 
-                           && request.auth.uid == userId;
+    // BYOB: Users bring their own backend, configure their own rules
+    // Example rule: Allow authenticated user to access their data
+    match /{collection}/{document} {
+      allow read, write: if request.auth != null;
     }
   }
 }
@@ -370,7 +371,7 @@ async function uploadChanges(lastSyncTime: string) {
   
   for (const entry of toUpload) {
     await setDoc(
-      doc(firestore, `users/${userId}/ledger_entries/${entry.id}`), 
+      doc(firestore, `ledger_entries/${entry.id}`), 
       entry
     );
   }
@@ -381,7 +382,7 @@ async function uploadChanges(lastSyncTime: string) {
 ```typescript
 async function downloadChanges(lastSyncTime: string) {
   const firestoreQuery = query(
-    collection(firestore, `users/${userId}/ledger_entries`),
+    collection(firestore, 'ledger_entries'),
     where('updated_at', '>', lastSyncTime)
   );
   
@@ -396,61 +397,9 @@ async function downloadChanges(lastSyncTime: string) {
     } else {
       // Local wins, re-upload
       await setDoc(
-        doc(firestore, `users/${userId}/ledger_entries/${remote.id}`),
+        doc(firestore, `ledger_entries/${remote.id}`),
         local
       );
-    }
-  }
-}
-```
-
-**Download (Cloud -> Local):**
-```javascript
-async function downloadChanges() {
-  const lastSync = await getLastSyncTime();
-  const firestoreQuery = query(
-    collection(firestore, `users/${userId}/ledger`),
-    where('_lww_timestamp', '>', lastSync)
-  );
-  
-  const snapshot = await getDocs(firestoreQuery);
-  
-  for (const doc of snapshot.docs) {
-    const remote = doc.data();
-    const local = await db.ledger.get(remote.id);
-    
-    if (!local || resolveConflict(local, remote) === 'remote') {
-      await db.ledger.put(remote);
-    } else {
-      // Local wins, re-upload
-      queueForSync(local);
-    }
-  }
-}
-```
-
-**Atomic Transaction Sync:**
-```javascript
-async function syncTransaction(transactionId) {
-  const transaction = await db.transactions.get(transactionId);
-  const entries = await db.ledger
-    .where('transactionId')
-    .equals(transactionId)
-    .toArray();
-  
-  // Check if any entry has conflict
-  const hasConflict = await checkConflicts(entries);
-  
-  if (hasConflict) {
-    // Resolve entire transaction atomically
-    const resolution = await resolveTransactionConflict(transaction, entries);
-    
-    if (resolution === 'remote') {
-      // Replace entire transaction
-      await replaceTransaction(transactionId, remoteData);
-    } else {
-      // Re-upload entire transaction
-      await uploadTransaction(transactionId);
     }
   }
 }

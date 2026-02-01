@@ -20,7 +20,7 @@ A Local-First Progressive Web Application (PWA) implementing a personal finance 
 ### 2. Double-Entry Accounting
 - Every transaction has balanced debits and credits
 - Maintains accounting equation: Assets = Liabilities + Equity
-- Immutable entries (corrections via new entries)
+- Entries can be edited; corrections can be made directly or via reversing entries
 
 ### 3. Triple Truth Multi-Currency
 - **Display Currency**: What user sees in UI (configurable)
@@ -60,13 +60,13 @@ All entities use UUID v4 for:
 ### Technology Choices
 - **Framework**: Nuxt 4.3 with PWA support
 - **UI Components**: shadcn-vue
-- **Storage**: IndexDB (via Dexie.js or idb wrapper)
+- **Storage**: IndexDB (via Dexie.js)
 - **Sync**: Firebase JS SDK (optional, user-configured)
-- **Math**: decimal.js or big.js (avoid floating point errors)
+- **Math**: decimal.js (avoid floating point errors)
 
 ### Validation Rules
 - Debits must equal credits (tolerance: 0.01)
-- All amounts must be positive numbers
+- Amounts can be positive or negative (signed values)
 - Valid currency codes (ISO 4217)
 - Valid account references
 - Valid UUID formats
@@ -86,19 +86,18 @@ For detailed specifications, see:
 ## Quick Reference
 
 **Core Entities:**
-- Ledger entries (denormalized, UUID-based)
-- Transactions (parent records)
+- Ledger entries (denormalized, UUID-based, atomic units)
 - Accounts (chart of accounts)
+- Budgets (budget tracking)
 - Exchange rates (historical snapshots)
+- Recurring rules (automated transactions)
 
 **Sync Metadata:**
-- `_lww_timestamp`: Epoch milliseconds of last modification
-- `_device_id`: Unique device identifier
-- `_version`: Monotonically increasing version number
+- `updated_at`: ISO8601 timestamp of last modification
 
 **Key Constraints:**
-- Debits = Credits (double-entry)
-- Immutable ledger (append-only)
+- Zero-sum validation (sum of amounts = 0)
+- Editable ledger entries
 - Atomic transaction sync (all entries together)
 
 ---

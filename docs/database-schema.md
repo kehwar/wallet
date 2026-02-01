@@ -134,8 +134,6 @@ interface Budget {
   id: UUID;
   name: string;             // e.g., "Groceries"
   currency: CurrencyCode;   // Immutable
-  period: 'monthly' | 'weekly' | 'yearly' | 'custom';
-  target_amount?: number;   // Optional goal
   
   is_archived: boolean;
   updated_at: ISODate;
@@ -143,13 +141,12 @@ interface Budget {
 ```
 
 **Key Properties:**
-- `period`: Defines budget reset frequency
-- `target_amount`: Optional spending target/goal for the period
 - Budget tracking is done by querying ledger entries with matching `budget_id`
+- Budget totals are tracked through transactions and recurring transactions to increase budgets
+- No predefined period or target amounts - flexible budget management
 
 **Validation Rules:**
 - `currency` is immutable after creation
-- `target_amount` must be positive if provided
 - Cannot delete budgets with existing ledger entries (use `is_archived`)
 
 ---
@@ -291,17 +288,16 @@ db.version(1).stores({
 ### Collections
 
 ```
-users/{userId}/
-  ├── ledger_entries/{entryId}
-  ├── accounts/{accountId}
-  ├── budgets/{budgetId}
-  ├── rates/{rateId}
-  └── rules/{ruleId}
+ledger_entries/{entryId}
+accounts/{accountId}
+budgets/{budgetId}
+rates/{rateId}
+rules/{ruleId}
 ```
 
 All documents use the same structure as IndexDB, enabling direct sync.
 
-**Note**: No separate sync_metadata collection needed. LWW conflict resolution uses the `updated_at` field on each document.
+**Note**: Users bring their own backend (BYOB). No per-user grouping necessary - each user configures their own Firestore instance. LWW conflict resolution uses the `updated_at` field on each document.
 
 ---
 
@@ -329,12 +325,12 @@ For each ledger entry:
 - All `ledger_entries.budget_id` must reference existing budget or be null
 - All `ledger_entries.recurring_rule_id` must reference existing rule or be null
 
-### Immutability Rules
+### Data Modification Rules
 
 - `account.currency` cannot be changed after creation
 - `budget.currency` cannot be changed after creation
-- Exchange rates (`rate_*` fields) in ledger entries cannot be changed
-- Use correcting/reversing entries instead of editing confirmed transactions
+- Exchange rates (`rate_*` fields) in ledger entries cannot be changed after creation
+- Ledger entries can be edited; corrections can be made directly or via reversing entries
 
 ---
 
@@ -502,11 +498,13 @@ Example Firestore rules:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId}/{collection}/{document} {
-      allow read, write: if request.auth.uid == userId;
+    // BYOB: Users configure their own Firestore instance and rules
+    // Example: Allow authenticated user to access all collections
+    match /{collection}/{document} {
+      allow read, write: if request.auth != null;
       
-      // Additional validation
-      allow write: if request.auth.uid == userId 
+      // Optional: Additional validation
+      allow write: if request.auth != null
                    && request.resource.data.updated_at is timestamp
                    && request.resource.data.id is string;
     }

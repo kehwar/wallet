@@ -5,7 +5,7 @@ A Local-First Progressive Web Application for personal finance management with o
 ## 🚀 Overview
 
 This wallet application implements a comprehensive personal finance system that:
-- **Works Offline**: All data stored locally in IndexDB, fully functional without internet
+- **Works Offline**: All data stored locally in IndexedDB, fully functional without internet
 - **Maintains Accounting Integrity**: Strict double-entry bookkeeping with balanced debits and credits
 - **Handles Multiple Currencies**: Triple truth system (Display, Account, Budget) with frozen exchange rates
 - **Syncs Optionally**: BYOB (Bring Your Own Backend) - sync to your own Firestore instance when needed
@@ -14,7 +14,7 @@ This wallet application implements a comprehensive personal finance system that:
 ## ✨ Key Features
 
 ### Local-First Architecture
-- All data stored in browser's IndexDB for instant access
+- All data stored in browser's IndexedDB for instant access
 - Full functionality offline - no internet required for day-to-day use
 - Optional synchronization to user's personal Firestore instance
 
@@ -38,7 +38,7 @@ This wallet application implements a comprehensive personal finance system that:
 
 - **Framework**: Nuxt 4.3 with PWA support
 - **UI Components**: shadcn-vue
-- **Storage**: IndexDB (via Dexie.js)
+- **Storage**: IndexedDB (via Dexie.js)
 - **Sync**: Firebase JS SDK (optional, user-configured)
 - **Math**: decimal.js (avoids floating point errors)
 

@@ -57,7 +57,7 @@ wallet/
 ## 📖 Documentation
 
 - **[GitHub Copilot Instructions](.github/copilot-instructions.md)** - Essential project overview and development guidelines
-- **[Database Schema](docs/database-schema.md)** - Complete data models, IndexDB and Firestore schemas
+- **[Database Schema](docs/database-schema.md)** - Complete data models, IndexedDB and Firestore schemas
 - **[Implementation Plan](docs/implementation-plan.md)** - Phased development roadmap and technical details
 
 ## 🎯 Core Principles

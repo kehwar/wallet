@@ -351,11 +351,10 @@ function resolveConflict(local, remote) {
 **Upload (Local -> Cloud):**
 ```javascript
 async function uploadChanges() {
+  // Get all unsynced entries
   const unsynced = await db.ledger
     .where('syncedAt')
     .equals(null)
-    .or('syncedAt')
-    .below(new Date(entry.updatedAt))
     .toArray();
   
   for (const entry of unsynced) {
@@ -370,12 +369,12 @@ async function uploadChanges() {
 ```javascript
 async function downloadChanges() {
   const lastSync = await getLastSyncTime();
-  const query = query(
+  const firestoreQuery = query(
     collection(firestore, `users/${userId}/ledger`),
     where('_lww_timestamp', '>', lastSync)
   );
   
-  const snapshot = await getDocs(query);
+  const snapshot = await getDocs(firestoreQuery);
   
   for (const doc of snapshot.docs) {
     const remote = doc.data();

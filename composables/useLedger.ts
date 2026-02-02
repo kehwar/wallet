@@ -191,3 +191,125 @@ export async function getEntriesByStatus(status: 'projected' | 'confirmed'): Pro
     .equals(status)
     .toArray()
 }
+
+/**
+ * Calculate account balance at a specific date
+ * Only includes entries on or before the specified date
+ */
+export async function calculateAccountBalanceAtDate(
+  account_id: string,
+  date: string
+): Promise<number> {
+  const db = useDatabase()
+  
+  const entries = await db.ledger_entries
+    .where('[account_id+date]')
+    .between([account_id, ''], [account_id, date], true, true)
+    .toArray()
+  
+  return entries.reduce((sum, entry) => {
+    return sum + entry.amount_account
+  }, 0)
+}
+
+/**
+ * Get account balance history over a date range
+ * Returns an array of { date, balance } objects
+ */
+export async function getAccountBalanceHistory(
+  account_id: string,
+  startDate: string,
+  endDate: string
+): Promise<Array<{ date: string; balance: number }>> {
+  const db = useDatabase()
+  
+  // Get all entries in the date range
+  const entries = await db.ledger_entries
+    .where('[account_id+date]')
+    .between([account_id, startDate], [account_id, endDate], true, true)
+    .sortBy('date')
+  
+  // Get starting balance (all entries before start date)
+  const startingBalance = await calculateAccountBalanceAtDate(
+    account_id,
+    new Date(new Date(startDate).getTime() - 1).toISOString()
+  )
+  
+  // Build balance history
+  const history: Array<{ date: string; balance: number }> = []
+  let runningBalance = startingBalance
+  
+  for (const entry of entries) {
+    runningBalance += entry.amount_account
+    
+    // Extract just the date part (YYYY-MM-DD)
+    const dateOnly = entry.date.split('T')[0]
+    
+    // Update or add entry for this date
+    const existingIndex = history.findIndex(h => h.date === dateOnly)
+    if (existingIndex >= 0) {
+      history[existingIndex].balance = runningBalance
+    } else {
+      history.push({ date: dateOnly, balance: runningBalance })
+    }
+  }
+  
+  return history
+}
+
+/**
+ * Calculate net worth (sum of all asset and liability accounts)
+ * Net worth = Assets - Liabilities
+ */
+export async function calculateNetWorth(displayCurrency: string): Promise<number> {
+  const { getAccountsByType } = await import('./useAccounts')
+  const { convertAmount } = await import('./useCurrency')
+  
+  // Get all asset and liability accounts that should be included
+  const allAccounts = await getAccountsByType('asset')
+  const assetAccounts = allAccounts.filter(a => a.include_in_net_worth)
+  
+  const liabilityAccounts = (await getAccountsByType('liability'))
+    .filter(a => a.include_in_net_worth)
+  
+  let totalAssets = 0
+  let totalLiabilities = 0
+  
+  const today = new Date().toISOString().split('T')[0]
+  
+  // Calculate total assets
+  for (const account of assetAccounts) {
+    const balance = await calculateAccountBalance(account.id)
+    
+    // Convert to display currency
+    const converted = await convertAmount(
+      balance,
+      account.currency,
+      displayCurrency,
+      today
+    )
+    
+    if (converted !== null) {
+      totalAssets += converted
+    }
+  }
+  
+  // Calculate total liabilities
+  for (const account of liabilityAccounts) {
+    const balance = await calculateAccountBalance(account.id)
+    
+    // Convert to display currency
+    const converted = await convertAmount(
+      balance,
+      account.currency,
+      displayCurrency,
+      today
+    )
+    
+    if (converted !== null) {
+      totalLiabilities += converted
+    }
+  }
+  
+  return totalAssets - totalLiabilities
+}

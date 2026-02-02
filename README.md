@@ -71,7 +71,9 @@ wallet/
 ## 🔧 Development Status
 
 **Phase 1 Complete: Core Data Layer** ✅
+**Phase 2 Complete: Accounting Engine** ✅
 
+### Phase 1: Core Data Layer
 The core data layer has been implemented with:
 - ✅ Nuxt 4.3 project setup with TypeScript
 - ✅ ESLint and Vitest configuration
@@ -80,7 +82,15 @@ The core data layer has been implemented with:
 - ✅ Double-entry validation
 - ✅ Unit tests with >90% coverage
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for development guide and [Implementation Plan](docs/implementation-plan.md) for the complete roadmap.
+### Phase 2: Accounting Engine
+The accounting engine has been implemented with:
+- ✅ High-level transaction API (income, expense, transfer, multi-split)
+- ✅ Balance calculation engine (point-in-time, history, net worth)
+- ✅ Multi-currency conversion and formatting
+- ✅ Currency utilities (34 currencies including PEN, parsing, formatting)
+- ✅ 91 total tests with 96% coverage
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for development guide, [PHASE1_SUMMARY.md](PHASE1_SUMMARY.md) for Phase 1 details, [PHASE2_SUMMARY.md](PHASE2_SUMMARY.md) for Phase 2 details, and [Implementation Plan](docs/implementation-plan.md) for the complete roadmap.
 
 ## 📝 License
 

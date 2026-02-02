@@ -77,6 +77,18 @@ Current test coverage: **91.16% statements, 87.17% functions** (exceeds 80% requ
 - **TypeScript**: Strict mode enabled for type safety
 - **Coverage Thresholds**: 80% for lines, functions, branches, and statements
 
+## Continuous Integration
+
+The project includes a GitHub Actions CI workflow (`.github/workflows/ci.yml`) that:
+
+- **Runs automatically** on every pull request
+- **Can be triggered manually** via GitHub Actions UI (workflow_dispatch)
+- **Executes linting** with `npm run lint`
+- **Runs all tests** with `npm test`
+- **Uses Node.js 20.x** with npm caching for optimal performance
+
+All pull requests must pass CI checks before merging.
+
 ## Core Data Layer (Phase 1)
 
 The core data layer implements:

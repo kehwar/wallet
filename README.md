@@ -87,7 +87,7 @@ The accounting engine has been implemented with:
 - ✅ High-level transaction API (income, expense, transfer, multi-split)
 - ✅ Balance calculation engine (point-in-time, history, net worth)
 - ✅ Multi-currency conversion and formatting
-- ✅ Currency utilities (33+ currencies, parsing, formatting)
+- ✅ Currency utilities (34 currencies including PEN, parsing, formatting)
 - ✅ 91 total tests with 96% coverage
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for development guide, [PHASE1_SUMMARY.md](PHASE1_SUMMARY.md) for Phase 1 details, [PHASE2_SUMMARY.md](PHASE2_SUMMARY.md) for Phase 2 details, and [Implementation Plan](docs/implementation-plan.md) for the complete roadmap.

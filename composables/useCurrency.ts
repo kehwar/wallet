@@ -43,7 +43,8 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   TWD: 'NT$',
   AED: 'د.إ',
   SAR: 'ر.س',
-  ARS: 'ARS$'
+  ARS: 'ARS$',
+  PEN: 'S/'
 }
 
 /**
@@ -268,7 +269,8 @@ export const COMMON_CURRENCIES: Array<{ code: CurrencyCode; name: string; symbol
   { code: 'TWD', name: 'Taiwan Dollar', symbol: 'NT$' },
   { code: 'AED', name: 'UAE Dirham', symbol: 'د.إ' },
   { code: 'SAR', name: 'Saudi Riyal', symbol: 'ر.س' },
-  { code: 'ARS', name: 'Argentine Peso', symbol: 'ARS$' }
+  { code: 'ARS', name: 'Argentine Peso', symbol: 'ARS$' },
+  { code: 'PEN', name: 'Peruvian Sol', symbol: 'S/' }
 ]
 
 /**

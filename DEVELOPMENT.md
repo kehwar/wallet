@@ -144,7 +144,7 @@ The accounting engine provides high-level transaction APIs and calculations:
 - **Formatting**: Locale-aware and custom currency formatting
 - **Parsing**: Parse user input with currency symbols and thousand separators
 - **Conversion**: Convert between currencies using exchange rates
-- **33+ Currencies**: Support for major world currencies with symbols
+- **34 Currencies**: Support for major world currencies with symbols (including PEN)
 
 ## Next Steps
 

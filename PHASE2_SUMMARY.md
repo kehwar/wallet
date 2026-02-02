@@ -102,15 +102,16 @@
   - Validates numeric input
   
 - ✅ `getCurrencySymbol()` - Get symbol for currency code
-  - 33+ common currencies supported
+  - 34 common currencies supported
+  - Includes new addition: PEN (Peruvian Sol) with symbol "S/"
   - Falls back to currency code for unknown currencies
 
 #### Currency Data
-- ✅ `COMMON_CURRENCIES` - Array of 33 common currencies
+- ✅ `COMMON_CURRENCIES` - Array of 34 common currencies
   - USD, EUR, GBP, JPY, CNY, CHF, CAD, AUD, NZD, INR
   - RUB, BRL, ZAR, KRW, SEK, NOK, DKK, PLN, THB, MXN
   - SGD, HKD, TRY, IDR, MYR, PHP, CZK, ILS, CLP, TWD
-  - AED, SAR, ARS
+  - AED, SAR, ARS, PEN
   - Each with code, name, and symbol
   
 - ✅ `getAllCurrencies()` - Retrieve list of supported currencies
@@ -224,7 +225,7 @@ wallet/
 
 1. **High-Level Transaction API**: Easy-to-use functions for common transaction patterns reduce boilerplate
 2. **Comprehensive Balance Calculations**: Point-in-time, historical, and net worth calculations
-3. **Full Multi-Currency Support**: Conversion, formatting, and parsing with 33+ currencies
+3. **Full Multi-Currency Support**: Conversion, formatting, and parsing with 34 currencies (including PEN)
 4. **Excellent Test Coverage**: 96.09% with 91 tests covering all major functionality
 5. **Developer Experience**: Well-documented, type-safe, and follows best practices
 

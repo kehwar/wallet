@@ -10,8 +10,10 @@ wallet/
 │   ├── useDatabase.ts    # Dexie database initialization
 │   ├── useAccounts.ts    # Account CRUD operations
 │   ├── useBudgets.ts     # Budget CRUD operations
-│   ├── useLedger.ts      # Ledger entry CRUD operations
-│   └── useExchangeRates.ts # Exchange rate management
+│   ├── useLedger.ts      # Ledger entry CRUD + balance calculations
+│   ├── useExchangeRates.ts # Exchange rate management
+│   ├── useTransactions.ts  # High-level transaction API (Phase 2)
+│   └── useCurrency.ts      # Currency utilities (Phase 2)
 ├── types/                # TypeScript type definitions
 │   └── models.ts         # Core data models
 ├── utils/                # Utility functions
@@ -21,7 +23,10 @@ wallet/
 │   ├── validation.test.ts
 │   ├── ledger.test.ts
 │   ├── accounts.test.ts
-│   └── budgets.test.ts
+│   ├── budgets.test.ts
+│   ├── transactions.test.ts        # Phase 2 tests
+│   ├── currency.test.ts            # Phase 2 tests
+│   └── balance-calculations.test.ts # Phase 2 tests
 ├── pages/                # Nuxt pages
 │   └── index.vue
 ├── docs/                 # Documentation
@@ -69,7 +74,12 @@ The project uses Vitest for unit testing with:
 - **fake-indexeddb** for IndexDB testing
 - **@vue/test-utils** for Vue component testing
 
-Current test coverage: **91.16% statements, 87.17% functions** (exceeds 80% requirement)
+Current test coverage: **96.09% statements, 85.93% functions** (exceeds 80% requirement)
+
+**Test Suites:**
+- Phase 1 (48 tests): validation, accounts, budgets, ledger
+- Phase 2 (43 tests): transactions, currency, balance calculations
+- Total: 91 tests
 
 ## Code Quality
 
@@ -112,6 +122,29 @@ The core data layer implements:
 - Accounts and budgets have immutable currencies
 - Exchange rates must be positive
 - Valid account types: asset, liability, income, expense, equity
+
+## Accounting Engine (Phase 2)
+
+The accounting engine provides high-level transaction APIs and calculations:
+
+### Transaction API
+- **Income Transactions**: Record income with automatic double-entry (salary, freelance, etc.)
+- **Expense Transactions**: Record expenses with automatic double-entry (groceries, utilities, etc.)
+- **Transfer Transactions**: Move money between accounts
+- **Multi-Split Transactions**: Complex transactions with multiple splits
+- **Multi-Currency Support**: Automatic exchange rate lookup and conversion
+
+### Balance Calculations
+- **Point-in-Time Balance**: Calculate account balance at any date
+- **Balance History**: Get balance over a date range
+- **Net Worth Calculation**: Sum of assets minus liabilities across all currencies
+- **Account Activity**: Query transactions for an account
+
+### Currency Utilities
+- **Formatting**: Locale-aware and custom currency formatting
+- **Parsing**: Parse user input with currency symbols and thousand separators
+- **Conversion**: Convert between currencies using exchange rates
+- **33+ Currencies**: Support for major world currencies with symbols
 
 ## Next Steps
 

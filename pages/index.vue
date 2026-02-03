@@ -15,7 +15,7 @@
       </div>
       <div class="status-item">
         <span class="status-label">Phase 3: PWA Foundation</span>
-        <span class="status-badge in-progress">⚡ In Progress</span>
+        <span class="status-badge complete">✓ Complete</span>
       </div>
     </div>
 
@@ -48,7 +48,7 @@
         <li>✓ Support for 34 currencies with frozen exchange rates</li>
         <li>✓ Transaction APIs (income, expense, transfer, multi-split)</li>
         <li>✓ Balance calculations and net worth tracking</li>
-        <li>⚡ PWA capabilities (installable, offline-ready)</li>
+        <li>✓ PWA capabilities (installable, offline-ready)</li>
         <li>🔜 Firestore sync with BYOB (Bring Your Own Backend)</li>
         <li>🔜 User interface for transaction management</li>
       </ul>

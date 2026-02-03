@@ -1,7 +1,17 @@
 <template>
   <div class="container">
-    <h1>Wallet PWA</h1>
-    <p>Local-First Personal Finance Management</p>
+    <div class="header">
+      <div>
+        <h1>Wallet PWA</h1>
+        <p>Local-First Personal Finance Management</p>
+      </div>
+      <NuxtLink to="/settings" class="settings-link">
+        ⚙️ Settings
+      </NuxtLink>
+    </div>
+    
+    <!-- Sync Status -->
+    <SyncStatus />
     
     <div class="status-card">
       <h2>Development Status</h2>
@@ -16,6 +26,10 @@
       <div class="status-item">
         <span class="status-label">Phase 3: PWA Foundation</span>
         <span class="status-badge complete">✓ Complete</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Phase 4: Sync Implementation</span>
+        <span class="status-badge in-progress">🔄 In Progress</span>
       </div>
     </div>
 
@@ -49,7 +63,8 @@
         <li>✓ Transaction APIs (income, expense, transfer, multi-split)</li>
         <li>✓ Balance calculations and net worth tracking</li>
         <li>✓ PWA capabilities (installable, offline-ready)</li>
-        <li>🔜 Firestore sync with BYOB (Bring Your Own Backend)</li>
+        <li>✓ Firestore sync with BYOB (Bring Your Own Backend)</li>
+        <li>✓ Last-Write-Wins conflict resolution</li>
         <li>🔜 User interface for transaction management</li>
       </ul>
     </div>
@@ -72,6 +87,27 @@ if (import.meta.client) {
   margin: 0 auto;
   padding: 2rem;
   font-family: system-ui, -apple-system, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.settings-link {
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  color: #374151;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.settings-link:hover {
+  background: #e5e7eb;
 }
 
 h1 {

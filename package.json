@@ -17,6 +17,7 @@
   "dependencies": {
     "decimal.js": "^10.4.3",
     "dexie": "^4.0.10",
+    "firebase": "^12.8.0",
     "nuxt": "^4.3.0",
     "vue": "latest"
   },

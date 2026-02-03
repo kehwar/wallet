@@ -44,6 +44,10 @@ export interface LedgerEntry {
   // === Sync Metadata ===
   created_at: ISODate
   updated_at: ISODate
+  
+  // LWW (Last-Write-Wins) Fields
+  _device_id?: string // UUID of device that made the last change
+  _version?: number // Version counter for optimistic concurrency
 }
 
 /**
@@ -61,6 +65,10 @@ export interface Account {
   is_archived: boolean
 
   updated_at: ISODate
+  
+  // LWW (Last-Write-Wins) Fields
+  _device_id?: string
+  _version?: number
 }
 
 /**
@@ -73,6 +81,10 @@ export interface Budget {
 
   is_archived: boolean
   updated_at: ISODate
+  
+  // LWW (Last-Write-Wins) Fields
+  _device_id?: string
+  _version?: number
 }
 
 /**
@@ -86,6 +98,10 @@ export interface ExchangeRate {
   date: string // YYYY-MM-DD
   source: 'manual' | 'api'
   updated_at: ISODate
+  
+  // LWW (Last-Write-Wins) Fields
+  _device_id?: string
+  _version?: number
 }
 
 /**
@@ -98,6 +114,10 @@ export interface RecurringRule {
   template_entries: Partial<LedgerEntry>[]
   generated_up_to: ISODate
   updated_at: ISODate
+  
+  // LWW (Last-Write-Wins) Fields
+  _device_id?: string
+  _version?: number
 }
 
 /**
@@ -107,4 +127,46 @@ export interface ValidationError {
   field: string
   message: string
   code: string
+}
+
+/**
+ * Firebase Configuration - BYOB (Bring Your Own Backend)
+ * User provides their own Firebase project credentials
+ */
+export interface FirebaseConfig {
+  apiKey: string
+  authDomain: string
+  projectId: string
+  storageBucket?: string
+  messagingSenderId?: string
+  appId: string
+  enabled: boolean // Whether sync is enabled
+  lastSync?: ISODate // Last successful sync timestamp
+}
+
+/**
+ * Sync Status - Current state of synchronization
+ */
+export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error' | 'offline'
+
+/**
+ * Sync Conflict - When LWW resolution needs user attention
+ */
+export interface SyncConflict {
+  id: UUID
+  entity_type: 'ledger_entry' | 'account' | 'budget' | 'exchange_rate' | 'recurring_rule'
+  entity_id: UUID
+  local_version: unknown
+  remote_version: unknown
+  detected_at: ISODate
+  resolved: boolean
+}
+
+/**
+ * Device Info - Identifies the device making changes
+ */
+export interface DeviceInfo {
+  device_id: UUID // Persistent device identifier stored in IndexedDB
+  device_name: string // User-friendly name
+  last_active: ISODate
 }

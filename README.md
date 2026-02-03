@@ -72,6 +72,7 @@ wallet/
 
 **Phase 1 Complete: Core Data Layer** ✅
 **Phase 2 Complete: Accounting Engine** ✅
+**Phase 3 Complete: PWA Foundation** ✅
 
 ### Phase 1: Core Data Layer
 The core data layer has been implemented with:
@@ -90,7 +91,16 @@ The accounting engine has been implemented with:
 - ✅ Currency utilities (34 currencies including PEN, parsing, formatting)
 - ✅ 91 total tests with 96% coverage
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for development guide, [PHASE1_SUMMARY.md](PHASE1_SUMMARY.md) for Phase 1 details, [PHASE2_SUMMARY.md](PHASE2_SUMMARY.md) for Phase 2 details, and [Implementation Plan](docs/implementation-plan.md) for the complete roadmap.
+### Phase 3: PWA Foundation
+The PWA capabilities have been implemented with:
+- ✅ Service worker with Workbox (auto-update, offline caching)
+- ✅ PWA manifest (installable app)
+- ✅ Network status detection (online/offline indicators)
+- ✅ Update notifications and install prompts
+- ✅ App icons and visual assets
+- ✅ Production build with 401 KB gzipped bundle
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for development guide, [PHASE1_SUMMARY.md](PHASE1_SUMMARY.md) for Phase 1 details, [PHASE2_SUMMARY.md](PHASE2_SUMMARY.md) for Phase 2 details, [PHASE3_SUMMARY.md](PHASE3_SUMMARY.md) for Phase 3 details, and [Implementation Plan](docs/implementation-plan.md) for the complete roadmap.
 
 ## 📝 License
 

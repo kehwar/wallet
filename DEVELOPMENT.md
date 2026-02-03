@@ -86,7 +86,8 @@ Current test coverage: **96.09% statements, 85.93% functions** (exceeds 80% requ
 **Test Suites:**
 - Phase 1 (48 tests): validation, accounts, budgets, ledger
 - Phase 2 (43 tests): transactions, currency, balance calculations
-- Total: 91 tests
+- Phase 4 (15 tests): sync engine, LWW conflict resolution
+- Total: 106 tests
 
 ## Code Quality
 
@@ -178,11 +179,41 @@ The PWA capabilities enable offline-first operation and app installation:
 - **PWABanner**: Displays offline indicators, update notifications, and install prompts
 - **Network Status**: Real-time online/offline detection with visual feedback
 
+## Sync Implementation (Phase 4)
+
+The sync engine enables optional cloud synchronization with user's own Firebase backend:
+
+### Firebase Integration
+- **BYOB Architecture**: Bring Your Own Backend - users configure their own Firebase
+- **useFirebase Composable**: Firebase initialization and connection management
+- **Configuration UI**: User-friendly setup page for Firebase credentials
+- **Security Documentation**: Complete guide for Firestore security rules
+
+### Sync Engine
+- **useSync Composable**: Bidirectional sync with Firestore
+- **Upload/Download**: Efficient sync of ledger entries, accounts, budgets
+- **LWW Conflict Resolution**: Last-Write-Wins based on `updated_at` timestamps
+- **Device Tracking**: Persistent device ID for multi-device scenarios
+- **Auto-Sync**: Automatic sync on network reconnection
+
+### Sync Status
+- **SyncStatus Component**: Real-time visual indicators
+- **Manual Sync**: On-demand sync button
+- **Error Handling**: Clear error messages and recovery
+- **Last Sync Time**: Human-readable timestamps
+
+### Data Model Enhancements
+- **Sync Metadata**: All entities include `_device_id`, `_version`, `updated_at`
+- **Conflict Detection**: Version tracking for optimistic concurrency
+- **Audit Trail**: Track which device made changes
+
 ## Next Steps
 
 See [implementation-plan.md](./docs/implementation-plan.md) for:
+- **Phase 1**: Core Data Layer (validation, accounts, budgets, ledger) ✅ COMPLETE
+- **Phase 2**: Accounting Engine (transactions, currency, balance calculations) ✅ COMPLETE
 - **Phase 3**: PWA Foundation (service worker, offline capabilities) ✅ COMPLETE
-- **Phase 4**: Sync Implementation (Firestore BYOB, LWW conflict resolution)
+- **Phase 4**: Sync Implementation (Firestore BYOB, LWW conflict resolution) ✅ COMPLETE
 - **Phase 5**: User Interface (transaction forms, reports, dashboards)
 - **Phase 6**: Testing & Optimization (E2E tests, performance, accessibility)
 

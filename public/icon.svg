@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#4F46E5"/>
+  <g transform="translate(256,256)">
+    <!-- Wallet icon -->
+    <path d="M-128,-64 L128,-64 L128,128 L-128,128 Z" fill="none" stroke="white" stroke-width="20" stroke-linejoin="round"/>
+    <path d="M-128,-64 L-128,-96 L96,-96 L96,-64" fill="none" stroke="white" stroke-width="20" stroke-linejoin="round"/>
+    <circle cx="80" cy="32" r="16" fill="white"/>
+    <!-- Dollar sign -->
+    <text x="0" y="20" font-size="120" font-weight="bold" fill="white" text-anchor="middle">$</text>
+  </g>
+</svg>

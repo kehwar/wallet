@@ -13,7 +13,10 @@ wallet/
 │   ├── useLedger.ts      # Ledger entry CRUD + balance calculations
 │   ├── useExchangeRates.ts # Exchange rate management
 │   ├── useTransactions.ts  # High-level transaction API (Phase 2)
-│   └── useCurrency.ts      # Currency utilities (Phase 2)
+│   ├── useCurrency.ts      # Currency utilities (Phase 2)
+│   └── useNetworkStatus.ts # Network detection and PWA install (Phase 3)
+├── components/           # Vue components
+│   └── PWABanner.vue     # PWA notifications and install prompt (Phase 3)
 ├── types/                # TypeScript type definitions
 │   └── models.ts         # Core data models
 ├── utils/                # Utility functions
@@ -28,11 +31,15 @@ wallet/
 │   ├── currency.test.ts            # Phase 2 tests
 │   └── balance-calculations.test.ts # Phase 2 tests
 ├── pages/                # Nuxt pages
-│   └── index.vue
+│   └── index.vue         # Home page with PWA status (Phase 3)
+├── public/               # Static assets
+│   ├── icon.svg          # App icon source (Phase 3)
+│   ├── icon-192x192.png  # PWA icon small (Phase 3)
+│   └── icon-512x512.png  # PWA icon large (Phase 3)
 ├── docs/                 # Documentation
 │   ├── database-schema.md
 │   └── implementation-plan.md
-└── app.vue              # Root component
+└── app.vue              # Root component with PWA banner (Phase 3)
 
 ```
 
@@ -146,11 +153,35 @@ The accounting engine provides high-level transaction APIs and calculations:
 - **Conversion**: Convert between currencies using exchange rates
 - **34 Currencies**: Support for major world currencies with symbols (including PEN)
 
+## PWA Foundation (Phase 3)
+
+The PWA capabilities enable offline-first operation and app installation:
+
+### Service Worker
+- **Auto-Update**: Service worker updates automatically with user notification
+- **Offline Caching**: All static assets (JS, CSS, HTML, images) cached for offline use
+- **Font Caching**: Google Fonts cached with long-term expiration
+- **Background Sync**: Ready for offline operation queuing
+
+### Network Detection
+- **Online/Offline Status**: Real-time network state detection
+- **User Feedback**: Visual indicators when offline
+- **Automatic Reconnection**: Detects when network is restored
+
+### Installation
+- **Installable**: Add to home screen on mobile and desktop
+- **Install Prompt**: Customizable install banner
+- **Standalone Mode**: Runs as separate app without browser UI
+- **App Icons**: Multiple sizes (192x192, 512x512) for different devices
+
+### Components
+- **PWABanner**: Displays offline indicators, update notifications, and install prompts
+- **Network Status**: Real-time online/offline detection with visual feedback
+
 ## Next Steps
 
 See [implementation-plan.md](./docs/implementation-plan.md) for:
-- **Phase 2**: Accounting Engine (transaction creation, balance calculation, multi-currency)
-- **Phase 3**: PWA Foundation (service worker, offline capabilities)
+- **Phase 3**: PWA Foundation (service worker, offline capabilities) ✅ COMPLETE
 - **Phase 4**: Sync Implementation (Firestore BYOB, LWW conflict resolution)
 - **Phase 5**: User Interface (transaction forms, reports, dashboards)
 - **Phase 6**: Testing & Optimization (E2E tests, performance, accessibility)

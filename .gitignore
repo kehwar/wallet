@@ -30,3 +30,6 @@ coverage
 *.tmp
 *.temp
 /tmp
+
+# Build scripts (temporary)
+generate-icons.mjs

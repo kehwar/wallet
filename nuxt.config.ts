@@ -13,6 +13,7 @@ export default defineNuxtConfig({
   ssr: false, // Static generation for PWA
   
   app: {
+    baseURL: process.env.NODE_ENV === 'production' ? '/wallet/' : '/',
     head: {
       htmlAttrs: {
         lang: 'en'
@@ -35,7 +36,7 @@ export default defineNuxtConfig({
       theme_color: '#ffffff',
       background_color: '#ffffff',
       display: 'standalone',
-      start_url: '/',
+      start_url: process.env.NODE_ENV === 'production' ? '/wallet/' : '/',
       icons: [
         {
           src: '/icon-192x192.png',
@@ -50,7 +51,7 @@ export default defineNuxtConfig({
       ]
     },
     workbox: {
-      navigateFallback: '/',
+      navigateFallback: process.env.NODE_ENV === 'production' ? '/wallet/' : '/',
       globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
       cleanupOutdatedCaches: true,
       runtimeCaching: [

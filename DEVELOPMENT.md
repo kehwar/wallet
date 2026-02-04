@@ -32,7 +32,7 @@ npm run build
 
 - **Overall Progress**: 90% Complete (Phases 1-5 complete, Phase 6 nearly complete)
 - **Code Base**: ~6,000 lines across 13 composables, 6 pages, 3 components
-- **Test Coverage**: 106 unit tests (96% coverage), 52 E2E tests across 9 suites
+- **Test Coverage**: 106 unit tests (82% statements, 65% functions, 94% branches), 47 E2E tests across 9 suites (3 skipped)
 - **Build Size**: 403 KB gzipped (1.67 MB uncompressed)
 - **Status**: Production-ready, comprehensive testing complete
 
@@ -133,8 +133,8 @@ The project uses Vitest for unit testing and Playwright for E2E testing:
 - **@axe-core/playwright** for accessibility testing
 
 ### Test Coverage
-- **Unit Tests**: 96.09% statements, 85.93% functions (exceeds 80% requirement)
-- **Total Tests**: 106 unit tests + 28 E2E tests = 134 tests
+- **Unit Tests**: 82.34% statements, 94.45% branches (65.21% functions - UI integration code not fully tested)
+- **Total Tests**: 106 unit tests + 47 active E2E tests = 153 tests
 
 **Test Suites:**
 
@@ -143,8 +143,8 @@ The project uses Vitest for unit testing and Playwright for E2E testing:
 - Phase 2 (43 tests): transactions, currency, balance calculations
 - Phase 4 (15 tests): sync engine, LWW conflict resolution
 
-**E2E Tests (28 total):**
-- Phase 6: basic navigation, account/transaction management, offline functionality, accessibility, performance
+**E2E Tests (47 active, 3 skipped):**
+- Phase 6: basic navigation, account/transaction management, offline functionality, accessibility, performance, budgets, reports, multi-currency
 
 ## Code Quality
 
@@ -350,20 +350,21 @@ See [implementation-plan.md](./docs/implementation-plan.md) for:
 
 ### Phase 6 Status
 - ✅ E2E test infrastructure (Playwright)
-- ✅ 52 E2E tests across 9 test suites
+- ✅ 47 active E2E tests across 9 test suites (3 skipped)
 - ✅ Accessibility testing (WCAG 2.1 AA)
 - ✅ Performance benchmarking
 - ✅ CI/CD integration
-- ✅ Additional test scenarios (budgets, reports, multi-currency)
+- ✅ User and deployment documentation
+- ⏳ Optional: Advanced performance optimizations (lazy loading, virtual scrolling)
 
 **Test Suites**:
 1. Basic navigation (3 tests)
 2. Account management (4 tests)
-3. Transaction creation (5 tests)
-4. Offline functionality (3 tests)
-5. Accessibility (8 tests)
+3. Transaction creation (4 tests)
+4. Offline functionality (1 test, 2 skipped)
+5. Accessibility (6 tests, 1 skipped)
 6. Performance (5 tests)
-7. Budget management (7 tests)
+7. Budget management (6 tests)
 8. Reports page (9 tests)
 9. Multi-currency (8 tests)
 

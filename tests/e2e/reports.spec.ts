@@ -116,9 +116,8 @@ test.describe('Reports Page', () => {
     // Wait for reports to load
     await expect(page.locator('.loading')).not.toBeVisible({ timeout: 3000 });
     
-    // All summary and comparison values should be formatted
+    // All summary values should be formatted
     const summaryValues = page.locator('.summary-value');
-    const comparisonValues = page.locator('.comparison-value');
     
     // At least summary values should be visible (net worth section)
     const summaryCount = await summaryValues.count();

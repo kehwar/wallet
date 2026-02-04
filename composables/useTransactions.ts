@@ -367,3 +367,17 @@ export async function createMultiSplitTransaction(
   
   return await createTransaction(entries)
 }
+
+/**
+ * Vue composable wrapper for transactions functionality
+ * Provides all transaction utilities
+ */
+export function useTransactions() {
+  return {
+    createExpense,
+    createIncome,
+    createTransfer,
+    createMultiSplit,
+  }
+}
+

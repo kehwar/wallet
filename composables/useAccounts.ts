@@ -128,3 +128,29 @@ export async function getSystemDefaultAccount(): Promise<Account | undefined> {
   const accounts = await db.accounts.toArray()
   return accounts.find(account => account.is_system_default)
 }
+
+/**
+ * Vue composable wrapper for accounts functionality
+ * Provides reactive state and all CRUD operations
+ */
+export function useAccounts() {
+  const accounts = ref<Account[]>([])
+
+  const listAccounts = async (includeArchived = false) => {
+    accounts.value = await getAllAccounts(includeArchived)
+  }
+
+  return {
+    accounts,
+    listAccounts,
+    createAccount,
+    getAccount,
+    getAllAccounts,
+    updateAccount,
+    archiveAccount,
+    unarchiveAccount,
+    deleteAccount,
+    getSystemDefaultAccount,
+  }
+}
+

@@ -133,7 +133,8 @@ loadSavedConfig()
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto p-6">
+  <AppLayout>
+    <div class="max-w-2xl mx-auto">
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Firebase Configuration</h1>
       <p class="text-gray-600">
@@ -307,5 +308,5 @@ v-if="testResult" :class="[
         </p>
       </div>
     </div>
-  </div>
+  </div></AppLayout>
 </template>

@@ -279,3 +279,19 @@ export const COMMON_CURRENCIES: Array<{ code: CurrencyCode; name: string; symbol
 export function getAllCurrencies(): Array<{ code: CurrencyCode; name: string; symbol: string }> {
   return COMMON_CURRENCIES
 }
+
+/**
+ * Vue composable wrapper for currency functionality
+ * Provides all currency utilities
+ */
+export function useCurrency() {
+  return {
+    formatCurrency,
+    formatCurrencyCustom,
+    parseCurrency,
+    convertAmount,
+    getCurrencySymbol,
+    getAllCurrencies,
+  }
+}
+

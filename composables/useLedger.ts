@@ -336,11 +336,13 @@ export function useLedger() {
     updateLedgerEntry,
     deleteLedgerEntry,
     deleteTransaction,
-    getAccountEntries,
     getAccountActivity,
     calculateAccountBalance,
-    calculatePointInTimeBalance,
-    calculateBalanceHistory,
+    getBudgetSpending,
+    calculateBudgetTotal,
+    getEntriesByStatus,
+    calculateAccountBalanceAtDate,
+    getAccountBalanceHistory,
     calculateNetWorth,
   }
 }

@@ -287,10 +287,13 @@ export function getAllCurrencies(): Array<{ code: CurrencyCode; name: string; sy
 export function useCurrency() {
   return {
     formatCurrency,
-    formatCurrencyCustom,
-    parseCurrency,
+    formatCurrencyWithSymbol,
+    parseCurrencyInput,
     convertAmount,
     getCurrencySymbol,
+    getDisplayAmount,
+    getAccountAmount,
+    getBudgetAmount,
     getAllCurrencies,
   }
 }

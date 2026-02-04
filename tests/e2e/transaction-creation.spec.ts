@@ -60,20 +60,30 @@ test.describe('Transaction Creation', () => {
     await page.fill('input[placeholder="e.g., Grocery shopping"]', 'Weekly groceries')
     await page.fill('input[type="number"]', '150.50')
     
-    // Select account - get the first account that contains "Checking"
+    // Select account - select the first real account (index 1, skip "Select account...")
     const accountSelect = page.locator('select.form-select').nth(1)
-    const accountOptions = await accountSelect.locator('option').allTextContents()
-    const checkingOption = accountOptions.find(opt => opt.includes('Checking'))
-    if (checkingOption) {
-      await accountSelect.selectOption({ label: checkingOption })
+    const accountOptions = await accountSelect.locator('option').all()
+    if (accountOptions.length > 1) {
+      // Get the value of the first real account (not the placeholder)
+      const firstAccountValue = await accountOptions[1].getAttribute('value')
+      if (firstAccountValue) {
+        await accountSelect.selectOption(firstAccountValue)
+      }
     }
     
-    // Select budget - get the first budget that contains "Groceries"
+    // Select budget - select the first budget that's not "None"
     const budgetSelect = page.locator('select.form-select').nth(2)
-    const budgetOptions = await budgetSelect.locator('option').allTextContents()
-    const groceriesOption = budgetOptions.find(opt => opt.includes('Groceries'))
-    if (groceriesOption) {
-      await budgetSelect.selectOption({ label: groceriesOption })
+    const budgetOptions = await budgetSelect.locator('option').all()
+    // Find first option that's not "None"
+    for (let i = 0; i < budgetOptions.length; i++) {
+      const text = await budgetOptions[i].textContent()
+      if (text && text !== 'None' && text.includes('Groceries')) {
+        const value = await budgetOptions[i].getAttribute('value')
+        if (value) {
+          await budgetSelect.selectOption(value)
+          break
+        }
+      }
     }
     
     // Submit the form
@@ -83,7 +93,7 @@ test.describe('Transaction Creation', () => {
     await expect(page.locator('h2:has-text("New Transaction")')).not.toBeVisible()
     
     // Verify the transaction appears in the list
-    await expect(page.locator('text=Weekly groceries')).toBeVisible()
+    await expect(page.locator('text=Weekly groceries').first()).toBeVisible()
   })
   
   test('should create an income transaction', async ({ page }) => {
@@ -103,20 +113,30 @@ test.describe('Transaction Creation', () => {
     await page.fill('input[placeholder="e.g., Grocery shopping"]', 'Monthly salary')
     await page.fill('input[type="number"]', '5000')
     
-    // Select account - get the first account that contains "Checking"
+    // Select account - select the first real account (index 1, skip "Select account...")
     const accountSelect = page.locator('select.form-select').nth(1)
-    const accountOptions = await accountSelect.locator('option').allTextContents()
-    const checkingOption = accountOptions.find(opt => opt.includes('Checking'))
-    if (checkingOption) {
-      await accountSelect.selectOption({ label: checkingOption })
+    const accountOptions = await accountSelect.locator('option').all()
+    if (accountOptions.length > 1) {
+      // Get the value of the first real account (not the placeholder)
+      const firstAccountValue = await accountOptions[1].getAttribute('value')
+      if (firstAccountValue) {
+        await accountSelect.selectOption(firstAccountValue)
+      }
     }
     
-    // Select budget - get the first budget that contains "Salary"
+    // Select budget - select the first budget that contains "Salary"
     const budgetSelect = page.locator('select.form-select').nth(2)
-    const budgetOptions = await budgetSelect.locator('option').allTextContents()
-    const salaryOption = budgetOptions.find(opt => opt.includes('Salary'))
-    if (salaryOption) {
-      await budgetSelect.selectOption({ label: salaryOption })
+    const budgetOptions = await budgetSelect.locator('option').all()
+    // Find first option that contains "Salary"
+    for (let i = 0; i < budgetOptions.length; i++) {
+      const text = await budgetOptions[i].textContent()
+      if (text && text !== 'None' && text.includes('Salary')) {
+        const value = await budgetOptions[i].getAttribute('value')
+        if (value) {
+          await budgetSelect.selectOption(value)
+          break
+        }
+      }
     }
     
     // Submit the form
@@ -126,7 +146,7 @@ test.describe('Transaction Creation', () => {
     await expect(page.locator('h2:has-text("New Transaction")')).not.toBeVisible()
     
     // Verify the transaction appears in the list
-    await expect(page.locator('text=Monthly salary')).toBeVisible()
+    await expect(page.locator('text=Monthly salary').first()).toBeVisible()
   })
   
   test('should validate required fields', async ({ page }) => {

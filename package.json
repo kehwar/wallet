@@ -25,6 +25,7 @@
     "vue": "latest"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
     "@nuxt/eslint": "^1.13.0",
     "@playwright/test": "^1.58.1",
     "@vite-pwa/nuxt": "^1.1.0",

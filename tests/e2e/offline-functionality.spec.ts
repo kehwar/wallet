@@ -48,11 +48,11 @@ test.describe('Offline Functionality', () => {
     
     // Create an account
     await page.click('button:has-text("New Account")')
-    await page.fill('input[placeholder*="name" i]', 'Offline Test Account')
-    await page.selectOption('select', { label: 'Asset' })
-    await page.fill('input[list="currency-list"]', 'USD')
+    await expect(page.locator('h2:has-text("New Account")')).toBeVisible()
+    await page.fill('input[placeholder="e.g., Checking Account"]', 'Offline Test Account')
+    await page.selectOption('select.form-select', 'asset')
     await page.click('button:has-text("Create")')
-    await page.waitForTimeout(1000)
+    await expect(page.locator('h2:has-text("New Account")')).not.toBeVisible()
     
     // Verify it's visible
     await expect(page.locator('text=Offline Test Account')).toBeVisible()

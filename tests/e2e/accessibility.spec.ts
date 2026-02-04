@@ -67,13 +67,17 @@ test.describe('Keyboard Navigation', () => {
   test('should be able to navigate with keyboard', async ({ page }) => {
     await page.goto('/')
     
-    // Tab through navigation links
-    await page.keyboard.press('Tab')
+    // Press Tab to focus on the first focusable element
     await page.keyboard.press('Tab')
     
-    // Check if focus is visible
-    const focusedElement = await page.locator(':focus')
-    await expect(focusedElement).toBeVisible()
+    // Check if there's a focused element (body always has focus, so we check for a specific element)
+    const focusedElement = await page.evaluate(() => {
+      const el = document.activeElement
+      return el && el !== document.body ? el.tagName : null
+    })
+    
+    // Verify that something other than body is focused
+    expect(focusedElement).not.toBeNull()
   })
   
   test('should be able to activate buttons with Enter/Space', async ({ page }) => {

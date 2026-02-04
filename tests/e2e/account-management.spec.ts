@@ -7,17 +7,19 @@ test.describe('Account Management', () => {
     // Click "New Account" button
     await page.click('button:has-text("New Account")')
     
-    // Fill in the form
-    await page.fill('input[placeholder*="name" i]', 'Test Checking Account')
-    await page.selectOption('select', { label: 'Asset' })
-    await page.fill('input[list="currency-list"]', 'USD')
-    await page.fill('textarea[placeholder*="description" i]', 'My main checking account')
+    // Wait for modal to be visible
+    await expect(page.locator('h2:has-text("New Account")')).toBeVisible()
+    
+    // Fill in the form using more specific selectors
+    await page.fill('input[placeholder="e.g., Checking Account"]', 'Test Checking Account')
+    await page.selectOption('select.form-select', 'asset')
+    await page.fill('textarea[placeholder="Account details..."]', 'My main checking account')
     
     // Submit the form
     await page.click('button:has-text("Create")')
     
     // Wait for the modal to close and account to appear
-    await page.waitForTimeout(1000)
+    await expect(page.locator('h2:has-text("New Account")')).not.toBeVisible()
     
     // Verify the account appears in the list
     await expect(page.locator('text=Test Checking Account')).toBeVisible()

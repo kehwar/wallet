@@ -11,28 +11,28 @@ test.describe('Transaction Creation', () => {
     if (!hasAccounts) {
       // Create a checking account
       await page.click('button:has-text("New Account")')
-      await page.fill('input[placeholder*="name" i]', 'Checking')
-      await page.selectOption('select', { label: 'Asset' })
-      await page.fill('input[list="currency-list"]', 'USD')
+      await expect(page.locator('h2:has-text("New Account")')).toBeVisible()
+      await page.fill('input[placeholder="e.g., Checking Account"]', 'Checking')
+      await page.selectOption('select.form-select', 'asset')
       await page.click('button:has-text("Create")')
-      await page.waitForTimeout(1000)
+      await expect(page.locator('h2:has-text("New Account")')).not.toBeVisible()
       
       // Create an income category
       await page.goto('/budgets')
       await page.click('button:has-text("New Budget")')
-      await page.fill('input[placeholder*="name" i]', 'Salary')
-      await page.selectOption('select', { label: 'Income' })
-      await page.fill('input[list="currency-list"]', 'USD')
+      await expect(page.locator('h2:has-text("New Budget")')).toBeVisible()
+      await page.fill('input[placeholder="e.g., Groceries"]', 'Salary')
+      await page.selectOption('select.form-select >> nth=0', 'income')
       await page.click('button:has-text("Create")')
-      await page.waitForTimeout(1000)
+      await expect(page.locator('h2:has-text("New Budget")')).not.toBeVisible()
       
       // Create an expense category
       await page.click('button:has-text("New Budget")')
-      await page.fill('input[placeholder*="name" i]', 'Groceries')
-      await page.selectOption('select', { label: 'Expense' })
-      await page.fill('input[list="currency-list"]', 'USD')
+      await expect(page.locator('h2:has-text("New Budget")')).toBeVisible()
+      await page.fill('input[placeholder="e.g., Groceries"]', 'Groceries')
+      await page.selectOption('select.form-select >> nth=0', 'expense')
       await page.click('button:has-text("Create")')
-      await page.waitForTimeout(1000)
+      await expect(page.locator('h2:has-text("New Budget")')).not.toBeVisible()
     }
   })
   
@@ -42,26 +42,29 @@ test.describe('Transaction Creation', () => {
     // Click "New Transaction" button
     await page.click('button:has-text("New Transaction")')
     
+    // Wait for modal
+    await expect(page.locator('h2:has-text("New Transaction")')).toBeVisible()
+    
     // Select Expense type (default)
     await expect(page.locator('select').first()).toHaveValue('expense')
     
     // Fill in the form
     await page.fill('input[type="date"]', '2026-02-04')
-    await page.fill('input[placeholder*="description" i]', 'Weekly groceries')
+    await page.fill('input[placeholder="e.g., Grocery shopping"]', 'Weekly groceries')
     await page.fill('input[type="number"]', '150.50')
     
     // Select account and budget (assuming they exist from beforeEach)
-    const accountSelect = page.locator('select').nth(1)
+    const accountSelect = page.locator('select.form-select').nth(1)
     await accountSelect.selectOption({ label: /Checking/i })
     
-    const budgetSelect = page.locator('select').nth(2)
+    const budgetSelect = page.locator('select.form-select').nth(2)
     await budgetSelect.selectOption({ label: /Groceries/i })
     
     // Submit the form
     await page.click('button:has-text("Save Transaction")')
     
     // Wait for the modal to close
-    await page.waitForTimeout(1000)
+    await expect(page.locator('h2:has-text("New Transaction")')).not.toBeVisible()
     
     // Verify the transaction appears in the list
     await expect(page.locator('text=Weekly groceries')).toBeVisible()
@@ -73,26 +76,29 @@ test.describe('Transaction Creation', () => {
     // Click "New Transaction" button
     await page.click('button:has-text("New Transaction")')
     
+    // Wait for modal
+    await expect(page.locator('h2:has-text("New Transaction")')).toBeVisible()
+    
     // Select Income type
-    await page.selectOption('select', { label: 'Income' })
+    await page.selectOption('select', 'income')
     
     // Fill in the form
     await page.fill('input[type="date"]', '2026-02-01')
-    await page.fill('input[placeholder*="description" i]', 'Monthly salary')
+    await page.fill('input[placeholder="e.g., Grocery shopping"]', 'Monthly salary')
     await page.fill('input[type="number"]', '5000')
     
     // Select account and budget
-    const accountSelect = page.locator('select').nth(1)
+    const accountSelect = page.locator('select.form-select').nth(1)
     await accountSelect.selectOption({ label: /Checking/i })
     
-    const budgetSelect = page.locator('select').nth(2)
+    const budgetSelect = page.locator('select.form-select').nth(2)
     await budgetSelect.selectOption({ label: /Salary/i })
     
     // Submit the form
     await page.click('button:has-text("Save Transaction")')
     
     // Wait for the modal to close
-    await page.waitForTimeout(1000)
+    await expect(page.locator('h2:has-text("New Transaction")')).not.toBeVisible()
     
     // Verify the transaction appears in the list
     await expect(page.locator('text=Monthly salary')).toBeVisible()
@@ -103,6 +109,9 @@ test.describe('Transaction Creation', () => {
     
     // Click "New Transaction" button
     await page.click('button:has-text("New Transaction")')
+    
+    // Wait for modal
+    await expect(page.locator('h2:has-text("New Transaction")')).toBeVisible()
     
     // Try to submit without filling required fields
     await page.click('button:has-text("Save Transaction")')

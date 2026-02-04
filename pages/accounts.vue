@@ -106,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAccounts } from '../composables/useAccounts'
 import { useLedger } from '../composables/useLedger'
 import { useCurrency } from '../composables/useCurrency'
@@ -252,8 +252,22 @@ async function loadData() {
   }
 }
 
+// Keyboard event handler for Escape key
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && (showNewAccountForm.value || editingAccount.value)) {
+    closeModal()
+  }
+}
+
 onMounted(() => {
   loadData()
+  // Add keyboard event listener
+  window.addEventListener('keydown', handleKeydown)
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
 })
 </script>
 

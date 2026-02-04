@@ -154,3 +154,57 @@ export function useAccounts() {
   }
 }
 
+/**
+ * Get or create a system expense account for a currency
+ */
+export async function getOrCreateSystemExpenseAccount(currency: string): Promise<Account> {
+  const db = useDatabase()
+  const accounts = await db.accounts.toArray()
+  
+  // Look for existing system expense account
+  const existing = accounts.find(a => 
+    a.type === 'expense' && 
+    a.currency === currency &&
+    a.name.startsWith('System Expense')
+  )
+  
+  if (existing) {
+    return existing
+  }
+  
+  // Create new system expense account
+  return await createAccount({
+    name: `System Expense (${currency})`,
+    type: 'expense',
+    currency,
+    description: 'Auto-created system expense account',
+  })
+}
+
+/**
+ * Get or create a system income account for a currency
+ */
+export async function getOrCreateSystemIncomeAccount(currency: string): Promise<Account> {
+  const db = useDatabase()
+  const accounts = await db.accounts.toArray()
+  
+  // Look for existing system income account
+  const existing = accounts.find(a => 
+    a.type === 'income' && 
+    a.currency === currency &&
+    a.name.startsWith('System Income')
+  )
+  
+  if (existing) {
+    return existing
+  }
+  
+  // Create new system income account
+  return await createAccount({
+    name: `System Income (${currency})`,
+    type: 'income',
+    currency,
+    description: 'Auto-created system income account',
+  })
+}
+

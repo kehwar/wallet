@@ -14,6 +14,9 @@ export default defineNuxtConfig({
   
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'en'
+      },
       title: 'Wallet PWA',
       meta: [
         { charset: 'utf-8' },

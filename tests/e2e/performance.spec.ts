@@ -20,7 +20,7 @@ test.describe('Performance Tests', () => {
         try {
           const buffer = await response.body()
           resourceSizes.push(buffer.length)
-        } catch (e) {
+        } catch {
           // Some resources might not be accessible
         }
       }
@@ -56,6 +56,7 @@ test.describe('Performance Tests', () => {
     
     // Get initial metrics
     const metrics1 = await page.evaluate(() => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       jsHeap: (performance as any).memory?.usedJSHeapSize || 0,
     }))
     
@@ -69,13 +70,16 @@ test.describe('Performance Tests', () => {
     
     // Force garbage collection if available
     await page.evaluate(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((window as any).gc) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).gc()
       }
     })
     
     // Get final metrics
     const metrics2 = await page.evaluate(() => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       jsHeap: (performance as any).memory?.usedJSHeapSize || 0,
     }))
     
@@ -92,12 +96,11 @@ test.describe('Performance Tests', () => {
     
     // Create 50 transactions programmatically via IndexedDB
     await page.evaluate(async () => {
-      // @ts-ignore - Access to global db from composables
-      const { useDatabase } = await import('/composables/useDatabase')
+      // @ts-expect-error - Access to global composables in browser context
       const { useTransactions } = await import('/composables/useTransactions')
+      // @ts-expect-error - Access to global composables in browser context
       const { useAccounts } = await import('/composables/useAccounts')
       
-      const db = useDatabase()
       const { createExpense } = useTransactions()
       const { createAccount } = useAccounts()
       

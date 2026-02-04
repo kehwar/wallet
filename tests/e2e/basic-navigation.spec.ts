@@ -34,7 +34,7 @@ test.describe('Basic Navigation', () => {
     // Navigate to Settings page
     await page.goto('/settings')
     await expect(page).toHaveURL('/settings')
-    await expect(page.locator('h1')).toContainText('Settings')
+    await expect(page.locator('h1')).toContainText('Firebase Configuration')
   })
   
   test('should display PWA status', async ({ page }) => {

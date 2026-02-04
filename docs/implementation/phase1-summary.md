@@ -164,8 +164,11 @@ wallet/
 ├── pages/                # Nuxt pages
 │   └── index.vue         # Home page
 ├── docs/                 # Documentation
-│   ├── database-schema.md
-│   └── implementation-plan.md
+│   ├── implementation/
+│   │   ├── database-schema.md
+│   │   └── plan.md
+│   ├── deployment-guide.md
+│   └── user-guide.md
 ├── app.vue              # Root component
 ├── nuxt.config.ts       # Nuxt configuration
 ├── vitest.config.ts     # Test configuration
@@ -240,9 +243,9 @@ Based on the implementation plan, Phase 2 will focus on:
 ## 📝 Documentation
 
 - ✅ **README.md**: Project overview and status
-- ✅ **DEVELOPMENT.md**: Development guide with structure and scripts
-- ✅ **docs/database-schema.md**: Complete schema specification
-- ✅ **docs/implementation-plan.md**: Phased development roadmap
+- ✅ **docs/implementation/development.md**: Development guide with structure and scripts
+- ✅ **docs/implementation/database-schema.md**: Complete schema specification
+- ✅ **docs/implementation/plan.md**: Phased development roadmap
 - ✅ **Inline Documentation**: JSDoc comments throughout codebase
 
 ---

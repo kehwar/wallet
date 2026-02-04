@@ -506,7 +506,7 @@ If users enable sync:
 
 For deployment issues:
 - Check [GitHub Issues](https://github.com/kehwar/wallet/issues)
-- Review [DEVELOPMENT.md](DEVELOPMENT.md)
+- Review [DEVELOPMENT.md](implementation/development.md)
 - Consult platform documentation
 
 ---

@@ -460,9 +460,9 @@ If you edit data on multiple devices while offline:
 ## Getting Help
 
 ### Documentation
-- [Implementation Plan](docs/implementation-plan.md) - Technical details
-- [Database Schema](docs/database-schema.md) - Data structure
-- [Development Guide](DEVELOPMENT.md) - Developer setup
+- [Implementation Plan](implementation/plan.md) - Technical details
+- [Database Schema](implementation/database-schema.md) - Data structure
+- [Development Guide](implementation/development.md) - Developer setup
 
 ### Support
 - GitHub Issues: Report bugs or request features

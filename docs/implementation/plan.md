@@ -67,7 +67,7 @@ This document tracks the phased development and technical implementation of the 
 - ✅ Unit test suite (48 tests, 96% coverage)
 
 **Duration**: 2-3 weeks
-**Status**: See [PHASE1_SUMMARY.md](../PHASE1_SUMMARY.md) for details
+**Status**: See [PHASE1_SUMMARY.md](phase1-summary.md) for details
 
 ---
 
@@ -91,7 +91,7 @@ This document tracks the phased development and technical implementation of the 
 - ✅ Validation rules enforced
 
 **Duration**: 3-4 weeks
-**Status**: See [PHASE2_SUMMARY.md](../PHASE2_SUMMARY.md) for details
+**Status**: See [PHASE2_SUMMARY.md](phase2-summary.md) for details
 
 ---
 
@@ -115,7 +115,7 @@ This document tracks the phased development and technical implementation of the 
 - ✅ Update notifications
 
 **Duration**: 2 weeks
-**Status**: See [PHASE3_SUMMARY.md](../PHASE3_SUMMARY.md) for details
+**Status**: See [PHASE3_SUMMARY.md](phase3-summary.md) for details
 
 ---
 
@@ -141,7 +141,7 @@ This document tracks the phased development and technical implementation of the 
 - ✅ Security rules documentation
 
 **Duration**: 3-4 weeks
-**Status**: See [PHASE4_SUMMARY.md](../PHASE4_SUMMARY.md) for details
+**Status**: See [PHASE4_SUMMARY.md](phase4-summary.md) for details
 
 ---
 
@@ -167,7 +167,7 @@ This document tracks the phased development and technical implementation of the 
 - ✅ Multi-currency displays (10 common currencies)
 
 **Duration**: 4-6 weeks
-**Status**: See [PHASE5_SUMMARY.md](../PHASE5_SUMMARY.md) for details
+**Status**: See [PHASE5_SUMMARY.md](phase5-summary.md) for details
 
 ---
 
@@ -205,7 +205,7 @@ This document tracks the phased development and technical implementation of the 
 - ⏳ Optional: Load testing results (1000+ transactions)
 
 **Duration**: 2-3 weeks
-**Status**: See [PHASE6_SUMMARY.md](../PHASE6_SUMMARY.md) and [PHASE6_COMPLETION.md](../PHASE6_COMPLETION.md) for details
+**Status**: See [PHASE6_SUMMARY.md](phase6-summary.md) and [PHASE6_COMPLETION.md](phase6-completion.md) for details
 
 ---
 

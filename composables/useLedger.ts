@@ -313,3 +313,37 @@ export async function calculateNetWorth(displayCurrency: string): Promise<number
   
   return totalAssets - totalLiabilities
 }
+
+/**
+ * Vue composable wrapper for ledger functionality
+ * Provides reactive state and all CRUD operations
+ */
+export function useLedger() {
+  const entries = ref<LedgerEntry[]>([])
+
+  const listEntries = async () => {
+    const db = useDatabase()
+    entries.value = await db.ledger_entries.toArray()
+  }
+
+  return {
+    entries,
+    listEntries,
+    createLedgerEntry,
+    createTransaction,
+    getLedgerEntry,
+    getTransaction,
+    updateLedgerEntry,
+    deleteLedgerEntry,
+    deleteTransaction,
+    getAccountActivity,
+    calculateAccountBalance,
+    getBudgetSpending,
+    calculateBudgetTotal,
+    getEntriesByStatus,
+    calculateAccountBalanceAtDate,
+    getAccountBalanceHistory,
+    calculateNetWorth,
+  }
+}
+

@@ -1,74 +1,85 @@
 <template>
-  <div class="container">
-    <div class="header">
-      <div>
-        <h1>Wallet PWA</h1>
-        <p>Local-First Personal Finance Management</p>
+  <AppLayout>
+    <div class="home-page">
+      <div class="welcome-section">
+        <h1>Welcome to Wallet PWA</h1>
+        <p>Your local-first personal finance management tool</p>
       </div>
-      <NuxtLink to="/settings" class="settings-link">
-        ⚙️ Settings
-      </NuxtLink>
-    </div>
-    
-    <!-- Sync Status -->
-    <SyncStatus />
-    
-    <div class="status-card">
-      <h2>Development Status</h2>
-      <div class="status-item">
-        <span class="status-label">Phase 1: Core Data Layer</span>
-        <span class="status-badge complete">✓ Complete</span>
-      </div>
-      <div class="status-item">
-        <span class="status-label">Phase 2: Accounting Engine</span>
-        <span class="status-badge complete">✓ Complete</span>
-      </div>
-      <div class="status-item">
-        <span class="status-label">Phase 3: PWA Foundation</span>
-        <span class="status-badge complete">✓ Complete</span>
-      </div>
-      <div class="status-item">
-        <span class="status-label">Phase 4: Sync Implementation</span>
-        <span class="status-badge complete">✓ Complete</span>
-      </div>
-    </div>
 
-    <div class="pwa-status">
-      <h2>PWA Status</h2>
-      <div class="status-grid">
-        <div class="status-box">
-          <div class="status-indicator" :class="{ online: isOnline, offline: isOffline }"/>
-          <div class="status-info">
-            <div class="status-title">Network</div>
-            <div class="status-value">{{ isOnline ? 'Online' : 'Offline' }}</div>
-          </div>
-        </div>
+      <div class="quick-actions">
+        <NuxtLink to="/transactions" class="action-card">
+          <div class="action-icon">💸</div>
+          <h3>Transactions</h3>
+          <p>View and manage your transactions</p>
+        </NuxtLink>
         
-        <div class="status-box">
-          <div class="status-indicator" :class="{ success: isPWAInstalled }"/>
-          <div class="status-info">
-            <div class="status-title">Installation</div>
-            <div class="status-value">{{ isPWAInstalled ? 'Installed' : 'Not Installed' }}</div>
+        <NuxtLink to="/accounts" class="action-card">
+          <div class="action-icon">🏦</div>
+          <h3>Accounts</h3>
+          <p>Manage your accounts</p>
+        </NuxtLink>
+        
+        <NuxtLink to="/budgets" class="action-card">
+          <div class="action-icon">📊</div>
+          <h3>Budgets</h3>
+          <p>Track your budget categories</p>
+        </NuxtLink>
+        
+        <NuxtLink to="/reports" class="action-card">
+          <div class="action-icon">📈</div>
+          <h3>Reports</h3>
+          <p>View financial reports</p>
+        </NuxtLink>
+      </div>
+
+      <div class="status-section">
+        <div class="status-card">
+          <h2>Development Status</h2>
+          <div class="status-item">
+            <span class="status-label">Phase 1: Core Data Layer</span>
+            <span class="status-badge complete">✓ Complete</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Phase 2: Accounting Engine</span>
+            <span class="status-badge complete">✓ Complete</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Phase 3: PWA Foundation</span>
+            <span class="status-badge complete">✓ Complete</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Phase 4: Sync Implementation</span>
+            <span class="status-badge complete">✓ Complete</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Phase 5: User Interface</span>
+            <span class="status-badge in-progress">🔄 In Progress</span>
+          </div>
+        </div>
+
+        <div class="pwa-status">
+          <h2>PWA Status</h2>
+          <div class="status-grid">
+            <div class="status-box">
+              <div class="status-indicator" :class="{ online: isOnline, offline: isOffline }"/>
+              <div class="status-info">
+                <div class="status-title">Network</div>
+                <div class="status-value">{{ isOnline ? 'Online' : 'Offline' }}</div>
+              </div>
+            </div>
+            
+            <div class="status-box">
+              <div class="status-indicator" :class="{ success: isPWAInstalled }"/>
+              <div class="status-info">
+                <div class="status-title">Installation</div>
+                <div class="status-value">{{ isPWAInstalled ? 'Installed' : 'Not Installed' }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="features-card">
-      <h2>Key Features</h2>
-      <ul class="features-list">
-        <li>✓ Works fully offline with IndexedDB storage</li>
-        <li>✓ Double-entry accounting with automatic validation</li>
-        <li>✓ Support for 34 currencies with frozen exchange rates</li>
-        <li>✓ Transaction APIs (income, expense, transfer, multi-split)</li>
-        <li>✓ Balance calculations and net worth tracking</li>
-        <li>✓ PWA capabilities (installable, offline-ready)</li>
-        <li>✓ Firestore sync with BYOB (Bring Your Own Backend)</li>
-        <li>✓ Last-Write-Wins conflict resolution</li>
-        <li>🔜 User interface for transaction management</li>
-      </ul>
-    </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script setup lang="ts">
@@ -82,60 +93,85 @@ if (import.meta.client) {
 </script>
 
 <style scoped>
-.container {
-  max-width: 900px;
+.home-page {
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem;
-  font-family: system-ui, -apple-system, sans-serif;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
+.welcome-section {
+  text-align: center;
+  margin-bottom: 3rem;
 }
 
-.settings-link {
-  padding: 0.5rem 1rem;
-  background: #f3f4f6;
-  border-radius: 0.5rem;
-  text-decoration: none;
-  color: #374151;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-.settings-link:hover {
-  background: #e5e7eb;
-}
-
-h1 {
+.welcome-section h1 {
+  font-size: 2.5rem;
   color: #1f2937;
   margin-bottom: 0.5rem;
-  font-size: 2.5rem;
+}
+
+.welcome-section p {
+  font-size: 1.125rem;
+  color: #6b7280;
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.action-card {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.action-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.action-card h3 {
+  font-size: 1.25rem;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.action-card p {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.status-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+}
+
+.status-card,
+.pwa-status {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
   color: #374151;
   margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
-
-p {
-  color: #6b7280;
-  font-size: 1.125rem;
-  margin-bottom: 2rem;
-}
-
-.status-card,
-.pwa-status,
-.features-card {
-  background: white;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 .status-item {
@@ -153,6 +189,7 @@ p {
 .status-label {
   color: #374151;
   font-weight: 500;
+  font-size: 0.875rem;
 }
 
 .status-badge {
@@ -174,7 +211,7 @@ p {
 
 .status-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
 }
 
@@ -221,25 +258,31 @@ p {
 }
 
 .status-value {
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: #1f2937;
   font-weight: 600;
 }
 
-.features-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+@media (max-width: 768px) {
+  .welcome-section h1 {
+    font-size: 2rem;
+  }
 
-.features-list li {
-  padding: 0.75rem 0;
-  color: #4b5563;
-  font-size: 1rem;
-  border-bottom: 1px solid #e5e7eb;
-}
+  .quick-actions {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+  }
 
-.features-list li:last-child {
-  border-bottom: none;
+  .action-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .action-icon {
+    font-size: 2.5rem;
+  }
+
+  .status-section {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

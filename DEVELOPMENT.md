@@ -207,6 +207,51 @@ The sync engine enables optional cloud synchronization with user's own Firebase 
 - **Conflict Detection**: Version tracking for optimistic concurrency
 - **Audit Trail**: Track which device made changes
 
+## User Interface (Phase 5)
+
+The user interface provides a complete, production-ready interface for all wallet features:
+
+### Navigation & Layout
+- **AppLayout Component**: Consistent navigation across all pages
+- **Responsive Menu**: Mobile-friendly collapsible navigation
+- **Quick Actions**: Dashboard with cards for common tasks
+- **Sync Status**: Always-visible sync indicator
+
+### Account Management
+- **Account List**: Grouped by type (Asset, Liability, Equity, Income, Expense)
+- **Account CRUD**: Create, edit, and delete accounts
+- **Balance Display**: Real-time balance calculation per account
+- **Transaction Count**: Show number of transactions per account
+- **Currency Lock**: Currency immutable after creation
+
+### Transaction Management
+- **Transaction List**: Chronological view with search and filters
+- **Transaction Forms**: Unified modal for Expense, Income, Transfer
+- **Smart Fields**: Dynamic form fields based on transaction type
+- **Currency Support**: 10 common currencies in selector
+- **Account/Budget Assignment**: Dropdown selectors with validation
+
+### Budget Management
+- **Budget List**: Grouped by category (Income/Expense)
+- **Budget CRUD**: Create, edit, and delete budgets
+- **Spending Totals**: Automatic calculation from transactions
+- **Transaction Count**: Show usage per budget
+
+### Financial Reports
+- **Net Worth**: Assets - Liabilities calculation
+- **Income vs Expenses**: All-time comparison with net
+- **Account Balances**: List of all accounts with balances
+- **Budget Summary**: Total spending/income per budget
+- **Recent Transactions**: Last 10 with quick link to full list
+
+### Vue Composable Wrappers
+All data access now follows Vue 3 composable patterns:
+- **useAccounts()**: Returns reactive accounts + all account functions
+- **useBudgets()**: Returns reactive budgets + all budget functions
+- **useLedger()**: Returns reactive entries + all ledger functions
+- **useCurrency()**: Returns all currency utilities
+- **useTransactions()**: Returns transaction creation functions
+
 ## Next Steps
 
 See [implementation-plan.md](./docs/implementation-plan.md) for:
@@ -214,7 +259,7 @@ See [implementation-plan.md](./docs/implementation-plan.md) for:
 - **Phase 2**: Accounting Engine (transactions, currency, balance calculations) ✅ COMPLETE
 - **Phase 3**: PWA Foundation (service worker, offline capabilities) ✅ COMPLETE
 - **Phase 4**: Sync Implementation (Firestore BYOB, LWW conflict resolution) ✅ COMPLETE
-- **Phase 5**: User Interface (transaction forms, reports, dashboards)
+- **Phase 5**: User Interface (transaction forms, reports, dashboards) ✅ COMPLETE
 - **Phase 6**: Testing & Optimization (E2E tests, performance, accessibility)
 
 ## Documentation

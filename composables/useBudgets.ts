@@ -113,3 +113,28 @@ export async function deleteBudget(id: string): Promise<void> {
   
   await db.budgets.delete(id)
 }
+
+/**
+ * Vue composable wrapper for budgets functionality
+ * Provides reactive state and all CRUD operations
+ */
+export function useBudgets() {
+  const budgets = ref<Budget[]>([])
+
+  const listBudgets = async (includeArchived = false) => {
+    budgets.value = await getAllBudgets(includeArchived)
+  }
+
+  return {
+    budgets,
+    listBudgets,
+    createBudget,
+    getBudget,
+    getAllBudgets,
+    updateBudget,
+    archiveBudget,
+    unarchiveBudget,
+    deleteBudget,
+  }
+}
+

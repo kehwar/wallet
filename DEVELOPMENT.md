@@ -72,22 +72,43 @@ npm run test:ui
 
 # Run tests with coverage
 npm run test:coverage
+
+# Run E2E tests (requires dev server)
+npm run test:e2e
+
+# Run E2E tests with UI
+npm run test:e2e:ui
+
+# Run E2E tests in headed mode (see browser)
+npm run test:e2e:headed
 ```
 
 ## Testing
 
-The project uses Vitest for unit testing with:
+The project uses Vitest for unit testing and Playwright for E2E testing:
+
+### Unit Testing
 - **happy-dom** for DOM simulation
 - **fake-indexeddb** for IndexDB testing
 - **@vue/test-utils** for Vue component testing
 
-Current test coverage: **96.09% statements, 85.93% functions** (exceeds 80% requirement)
+### E2E Testing
+- **Playwright** for browser automation
+- **@axe-core/playwright** for accessibility testing
+
+### Test Coverage
+- **Unit Tests**: 96.09% statements, 85.93% functions (exceeds 80% requirement)
+- **Total Tests**: 106 unit tests + 28 E2E tests = 134 tests
 
 **Test Suites:**
+
+**Unit Tests (106 total):**
 - Phase 1 (48 tests): validation, accounts, budgets, ledger
 - Phase 2 (43 tests): transactions, currency, balance calculations
 - Phase 4 (15 tests): sync engine, LWW conflict resolution
-- Total: 106 tests
+
+**E2E Tests (28 total):**
+- Phase 6: basic navigation, account/transaction management, offline functionality, accessibility, performance
 
 ## Code Quality
 
@@ -252,6 +273,35 @@ All data access now follows Vue 3 composable patterns:
 - **useCurrency()**: Returns all currency utilities
 - **useTransactions()**: Returns transaction creation functions
 
+## Testing & Optimization (Phase 6)
+
+The testing and optimization phase ensures production-ready quality:
+
+### E2E Testing Infrastructure
+- **Playwright**: Browser automation for E2E tests
+- **Test Suites**: Navigation, CRUD operations, offline functionality
+- **CI Integration**: Automated E2E tests on every PR
+- **Visual Regression**: Screenshots on test failure
+- **Trace Files**: Debug failed tests with Playwright traces
+
+### Accessibility Testing
+- **Axe-core**: Automated WCAG 2.1 AA compliance scanning
+- **Keyboard Navigation**: Tab order and focus management tests
+- **Screen Reader**: ARIA labels and semantic HTML verification
+- **Color Contrast**: WCAG AA contrast ratio compliance
+
+### Performance Testing
+- **Load Time**: < 3 seconds page load target
+- **Bundle Size**: 403 KB gzipped (1.67 MB uncompressed)
+- **Memory Leaks**: Navigation stress testing
+- **Large Lists**: 50+ item rendering performance
+
+### Security Audit
+- **npm audit**: Critical vulnerabilities fixed
+- **Input Validation**: XSS protection review
+- **Dependencies**: Production dependencies clean
+- **BYOB Architecture**: User-controlled data storage
+
 ## Next Steps
 
 See [implementation-plan.md](./docs/implementation-plan.md) for:
@@ -260,7 +310,7 @@ See [implementation-plan.md](./docs/implementation-plan.md) for:
 - **Phase 3**: PWA Foundation (service worker, offline capabilities) ✅ COMPLETE
 - **Phase 4**: Sync Implementation (Firestore BYOB, LWW conflict resolution) ✅ COMPLETE
 - **Phase 5**: User Interface (transaction forms, reports, dashboards) ✅ COMPLETE
-- **Phase 6**: Testing & Optimization (E2E tests, performance, accessibility)
+- **Phase 6**: Testing & Optimization (E2E tests, performance, accessibility) ⚙️ IN PROGRESS
 
 ## Documentation
 

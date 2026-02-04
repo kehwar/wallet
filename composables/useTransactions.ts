@@ -5,7 +5,7 @@
 
 import type { LedgerEntry, CurrencyCode, TransactionStatus } from '~/types/models'
 import { createTransaction } from './useLedger'
-import { getAccount } from './useAccounts'
+import { getAccount, getOrCreateSystemExpenseAccount, getOrCreateSystemIncomeAccount } from './useAccounts'
 import { getBudget } from './useBudgets'
 import { findExchangeRate } from './useExchangeRates'
 
@@ -367,6 +367,73 @@ export async function createMultiSplitTransaction(
   
   return await createTransaction(entries)
 }
+
+/**
+ * Simplified transaction creation functions for UI
+ * These create system accounts automatically
+ */
+
+/**
+ * Simplified parameters for creating an expense (UI-friendly)
+ */
+export interface SimpleExpenseParams {
+  fromAccountId: string  // Asset account to pay from
+  amount: number
+  currency: CurrencyCode
+  description: string
+  date: string
+  budgetId?: string
+  status?: TransactionStatus
+}
+
+/**
+ * Simplified parameters for creating an income (UI-friendly)
+ */
+export interface SimpleIncomeParams {
+  toAccountId: string  // Asset account to receive into
+  amount: number
+  currency: CurrencyCode
+  description: string
+  date: string
+  budgetId?: string
+  status?: TransactionStatus
+}
+
+/**
+ * Create an expense transaction (simplified - creates system expense account automatically)
+ */
+async function createSimpleExpense(params: SimpleExpenseParams): Promise<LedgerEntry[]> {
+  // Get or create a default expense account for this currency
+  const expenseAccount = await getOrCreateSystemExpenseAccount(params.currency)
+  
+  return await createExpenseTransaction({
+    ...params,
+    expenseAccountId: expenseAccount.id,
+    assetAccountId: params.fromAccountId,
+  })
+}
+
+/**
+ * Create an income transaction (simplified - creates system income account automatically)
+ */
+async function createSimpleIncome(params: SimpleIncomeParams): Promise<LedgerEntry[]> {
+  // Get or create a default income account for this currency
+  const incomeAccount = await getOrCreateSystemIncomeAccount(params.currency)
+  
+  return await createIncomeTransaction({
+    ...params,
+    incomeAccountId: incomeAccount.id,
+    assetAccountId: params.toAccountId,
+  })
+}
+
+/**
+ * Aliases for convenience (use simplified versions for UI)
+ */
+const createExpense = createSimpleExpense
+const createIncome = createSimpleIncome
+const createTransfer = createTransferTransaction
+const createMultiSplit = createMultiSplitTransaction
 
 /**
  * Vue composable wrapper for transactions functionality

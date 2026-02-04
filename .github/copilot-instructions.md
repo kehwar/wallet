@@ -80,8 +80,8 @@ All entities use UUID v4 for:
 ## Documentation Structure
 
 For detailed specifications, see:
-- **[Database Schema](../docs/database-schema.md)** - Complete data models and IndexDB/Firestore schemas
-- **[Implementation Plan](../docs/implementation-plan.md)** - Phased development roadmap and technical details
+- **[Database Schema](../docs/implementation/database-schema.md)** - Complete data models and IndexDB/Firestore schemas
+- **[Implementation Plan](../docs/implementation/plan.md)** - Phased development roadmap and technical details
 
 ## Quick Reference
 

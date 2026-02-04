@@ -73,8 +73,11 @@ wallet/
 │   ├── icon-192x192.png  # PWA icon small (Phase 3)
 │   └── icon-512x512.png  # PWA icon large (Phase 3)
 ├── docs/                 # Documentation
-│   ├── database-schema.md
-│   └── implementation-plan.md
+│   ├── implementation/
+│   │   ├── database-schema.md
+│   │   └── plan.md
+│   ├── deployment-guide.md
+│   └── user-guide.md
 └── app.vue              # Root component with PWA banner (Phase 3)
 
 ```
@@ -340,7 +343,7 @@ The testing and optimization phase ensures production-ready quality:
 
 ## Next Steps
 
-See [implementation-plan.md](./docs/implementation-plan.md) for:
+See [plan.md](plan.md) for:
 - **Phase 1**: Core Data Layer (validation, accounts, budgets, ledger) ✅ COMPLETE
 - **Phase 2**: Accounting Engine (transactions, currency, balance calculations) ✅ COMPLETE
 - **Phase 3**: PWA Foundation (service worker, offline capabilities) ✅ COMPLETE
@@ -370,10 +373,10 @@ See [implementation-plan.md](./docs/implementation-plan.md) for:
 
 ## Documentation
 
-- **[Database Schema](./docs/database-schema.md)**: Complete data models and schemas
-- **[Implementation Plan](./docs/implementation-plan.md)**: Phased development roadmap
-- **[User Guide](./docs/user-guide.md)**: End-user documentation
-- **[Deployment Guide](./docs/deployment-guide.md)**: Hosting and deployment instructions
+- **[Database Schema](database-schema.md)**: Complete data models and schemas
+- **[Implementation Plan](plan.md)**: Phased development roadmap
+- **[User Guide](../user-guide.md)**: End-user documentation
+- **[Deployment Guide](../deployment-guide.md)**: Hosting and deployment instructions
 - **[GitHub Copilot Instructions](./.github/copilot-instructions.md)**: Development guidelines
 
 ## Contributing

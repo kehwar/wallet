@@ -49,16 +49,19 @@ wallet/
 ├── .github/
 │   └── copilot-instructions.md  # GitHub Copilot instructions
 ├── docs/
-│   ├── database-schema.md       # Complete data models and schemas
-│   └── implementation-plan.md   # Phased development roadmap
+│   ├── implementation/          # Implementation documentation
+│   │   ├── database-schema.md   # Complete data models and schemas
+│   │   └── plan.md              # Phased development roadmap
+│   ├── deployment-guide.md      # Deployment guide
+│   └── user-guide.md            # User guide
 └── README.md                     # This file
 ```
 
 ## 📖 Documentation
 
 - **[GitHub Copilot Instructions](.github/copilot-instructions.md)** - Essential project overview and development guidelines
-- **[Database Schema](docs/database-schema.md)** - Complete data models, IndexedDB and Firestore schemas
-- **[Implementation Plan](docs/implementation-plan.md)** - Phased development roadmap and technical details
+- **[Database Schema](docs/implementation/database-schema.md)** - Complete data models, IndexedDB and Firestore schemas
+- **[Implementation Plan](docs/implementation/plan.md)** - Phased development roadmap and technical details
 
 ## 🎯 Core Principles
 
@@ -144,7 +147,7 @@ The testing and optimization phase is nearly complete (90% complete):
 - ✅ Deployment documentation
 - ⏳ Optional performance optimizations (lazy loading, virtual scrolling)
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for development guide, [PHASE1_SUMMARY.md](PHASE1_SUMMARY.md) for Phase 1 details, [PHASE2_SUMMARY.md](PHASE2_SUMMARY.md) for Phase 2 details, [PHASE3_SUMMARY.md](PHASE3_SUMMARY.md) for Phase 3 details, [PHASE4_SUMMARY.md](PHASE4_SUMMARY.md) for Phase 4 details, [PHASE5_SUMMARY.md](PHASE5_SUMMARY.md) for Phase 5 details, [PHASE6_SUMMARY.md](PHASE6_SUMMARY.md) for Phase 6 details, and [Implementation Plan](docs/implementation-plan.md) for the complete roadmap.
+See [DEVELOPMENT.md](docs/implementation/development.md) for development guide, [PHASE1_SUMMARY.md](docs/implementation/phase1-summary.md) for Phase 1 details, [PHASE2_SUMMARY.md](docs/implementation/phase2-summary.md) for Phase 2 details, [PHASE3_SUMMARY.md](docs/implementation/phase3-summary.md) for Phase 3 details, [PHASE4_SUMMARY.md](docs/implementation/phase4-summary.md) for Phase 4 details, [PHASE5_SUMMARY.md](docs/implementation/phase5-summary.md) for Phase 5 details, [PHASE6_SUMMARY.md](docs/implementation/phase6-summary.md) for Phase 6 details, and [Implementation Plan](docs/implementation/plan.md) for the complete roadmap.
 
 ## 📝 License
 

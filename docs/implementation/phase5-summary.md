@@ -569,12 +569,12 @@ Phase 5 is complete and production-ready. The application now has:
 
 ## 📚 Documentation References
 
-- [Database Schema](../docs/database-schema.md)
-- [Implementation Plan](../docs/implementation-plan.md)
-- [Phase 1 Summary](../PHASE1_SUMMARY.md)
-- [Phase 2 Summary](../PHASE2_SUMMARY.md)
-- [Phase 3 Summary](../PHASE3_SUMMARY.md)
-- [Phase 4 Summary](../PHASE4_SUMMARY.md)
+- [Database Schema](database-schema.md)
+- [Implementation Plan](plan.md)
+- [Phase 1 Summary](phase1-summary.md)
+- [Phase 2 Summary](phase2-summary.md)
+- [Phase 3 Summary](phase3-summary.md)
+- [Phase 4 Summary](phase4-summary.md)
 
 ---
 

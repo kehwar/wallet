@@ -14,7 +14,6 @@ export default defineNuxtConfig({
   
   app: {
     baseURL: process.env.NODE_ENV === 'production' ? '/wallet/' : '/',
-    buildAssetsDir: '_nuxt/',
     head: {
       htmlAttrs: {
         lang: 'en'

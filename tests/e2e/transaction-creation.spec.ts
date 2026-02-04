@@ -16,23 +16,30 @@ test.describe('Transaction Creation', () => {
       await page.selectOption('select.form-select', 'asset')
       await page.click('button:has-text("Create")')
       await expect(page.locator('h2:has-text("New Account")')).not.toBeVisible()
+      await expect(page.locator('text=Checking')).toBeVisible()
       
       // Create an income category
       await page.goto('/budgets')
-      await page.click('button:has-text("New Budget")')
-      await expect(page.locator('h2:has-text("New Budget")')).toBeVisible()
-      await page.fill('input[placeholder="e.g., Groceries"]', 'Salary')
-      await page.selectOption('select.form-select >> nth=0', 'income')
-      await page.click('button:has-text("Create")')
-      await expect(page.locator('h2:has-text("New Budget")')).not.toBeVisible()
+      const hasSalary = await page.locator('text=Salary').isVisible().catch(() => false)
+      if (!hasSalary) {
+        await page.click('button:has-text("New Budget")')
+        await expect(page.locator('h2:has-text("New Budget")')).toBeVisible()
+        await page.fill('input[placeholder="e.g., Groceries"]', 'Salary')
+        await page.selectOption('select.form-select', 'income')
+        await page.click('button:has-text("Create")')
+        await expect(page.locator('h2:has-text("New Budget")')).not.toBeVisible()
+      }
       
-      // Create an expense category
-      await page.click('button:has-text("New Budget")')
-      await expect(page.locator('h2:has-text("New Budget")')).toBeVisible()
-      await page.fill('input[placeholder="e.g., Groceries"]', 'Groceries')
-      await page.selectOption('select.form-select >> nth=0', 'expense')
-      await page.click('button:has-text("Create")')
-      await expect(page.locator('h2:has-text("New Budget")')).not.toBeVisible()
+      // Create an expense category  
+      const hasGroceries = await page.locator('text=Groceries').isVisible().catch(() => false)
+      if (!hasGroceries) {
+        await page.click('button:has-text("New Budget")')
+        await expect(page.locator('h2:has-text("New Budget")')).toBeVisible()
+        await page.fill('input[placeholder="e.g., Groceries"]', 'Groceries')
+        await page.selectOption('select.form-select', 'expense')
+        await page.click('button:has-text("Create")')
+        await expect(page.locator('h2:has-text("New Budget")')).not.toBeVisible()
+      }
     }
   })
   

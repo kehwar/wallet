@@ -28,12 +28,16 @@ test.describe('Account Management', () => {
   test('should display empty state when no accounts exist', async ({ page }) => {
     await page.goto('/accounts')
     
-    // Check for empty state message (might not be visible if accounts exist from previous test)
-    const emptyState = page.locator('text=No accounts yet')
+    // This test is tricky because accounts may exist from previous tests
+    // Just verify the page structure is correct
     const hasAccounts = await page.locator('text=Test Checking Account').isVisible().catch(() => false)
     
-    if (!hasAccounts) {
-      await expect(emptyState).toBeVisible()
+    if (hasAccounts) {
+      // If accounts exist, verify they're displayed
+      await expect(page.locator('text=Test Checking Account')).toBeVisible()
+    } else {
+      // If no accounts exist, verify empty state message
+      await expect(page.locator('text=No asset accounts yet')).toBeVisible()
     }
   })
   

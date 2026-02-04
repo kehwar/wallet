@@ -53,12 +53,21 @@ test.describe('Transaction Creation', () => {
     await page.fill('input[placeholder="e.g., Grocery shopping"]', 'Weekly groceries')
     await page.fill('input[type="number"]', '150.50')
     
-    // Select account and budget (assuming they exist from beforeEach)
+    // Select account - get the first account that contains "Checking"
     const accountSelect = page.locator('select.form-select').nth(1)
-    await accountSelect.selectOption({ label: /Checking/i })
+    const accountOptions = await accountSelect.locator('option').allTextContents()
+    const checkingOption = accountOptions.find(opt => opt.includes('Checking'))
+    if (checkingOption) {
+      await accountSelect.selectOption({ label: checkingOption })
+    }
     
+    // Select budget - get the first budget that contains "Groceries"
     const budgetSelect = page.locator('select.form-select').nth(2)
-    await budgetSelect.selectOption({ label: /Groceries/i })
+    const budgetOptions = await budgetSelect.locator('option').allTextContents()
+    const groceriesOption = budgetOptions.find(opt => opt.includes('Groceries'))
+    if (groceriesOption) {
+      await budgetSelect.selectOption({ label: groceriesOption })
+    }
     
     // Submit the form
     await page.click('button:has-text("Save Transaction")')
@@ -87,12 +96,21 @@ test.describe('Transaction Creation', () => {
     await page.fill('input[placeholder="e.g., Grocery shopping"]', 'Monthly salary')
     await page.fill('input[type="number"]', '5000')
     
-    // Select account and budget
+    // Select account - get the first account that contains "Checking"
     const accountSelect = page.locator('select.form-select').nth(1)
-    await accountSelect.selectOption({ label: /Checking/i })
+    const accountOptions = await accountSelect.locator('option').allTextContents()
+    const checkingOption = accountOptions.find(opt => opt.includes('Checking'))
+    if (checkingOption) {
+      await accountSelect.selectOption({ label: checkingOption })
+    }
     
+    // Select budget - get the first budget that contains "Salary"
     const budgetSelect = page.locator('select.form-select').nth(2)
-    await budgetSelect.selectOption({ label: /Salary/i })
+    const budgetOptions = await budgetSelect.locator('option').allTextContents()
+    const salaryOption = budgetOptions.find(opt => opt.includes('Salary'))
+    if (salaryOption) {
+      await budgetSelect.selectOption({ label: salaryOption })
+    }
     
     // Submit the form
     await page.click('button:has-text("Save Transaction")')

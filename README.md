@@ -62,6 +62,10 @@ wallet/
 - **[GitHub Copilot Instructions](.github/copilot-instructions.md)** - Essential project overview and development guidelines
 - **[Database Schema](docs/implementation/database-schema.md)** - Complete data models, IndexedDB and Firestore schemas
 - **[Implementation Plan](docs/implementation/plan.md)** - Phased development roadmap and technical details
+- **[Browser Compatibility](docs/browser-compatibility.md)** - Supported browsers, known issues, testing strategy
+- **[Performance Optimization](docs/performance-optimization.md)** - Performance metrics, optimizations, best practices
+- **[User Guide](docs/user-guide.md)** - End-user documentation
+- **[Deployment Guide](docs/deployment-guide.md)** - Deployment instructions and hosting options
 
 ## 🎯 Core Principles
 
@@ -73,22 +77,32 @@ wallet/
 
 ## 🔧 Development Status
 
-**Overall Progress: 92% Complete**
+**Overall Progress: 94% Complete**
 
 **Phase 1 Complete: Core Data Layer** ✅  
 **Phase 2 Complete: Accounting Engine** ✅  
 **Phase 3 Complete: PWA Foundation** ✅  
 **Phase 4 Complete: Sync Implementation** ✅  
 **Phase 5 Complete: User Interface** ✅  
-**Phase 6 Nearly Complete: Testing & Optimization** ✅ (92% complete)
+**Phase 6 Nearly Complete: Testing & Optimization** ✅ (94% complete)
 
 ### Quick Stats
 - **Code Base**: ~10,370 lines of TypeScript/Vue
-- **Test Coverage**: 106 unit tests (79.1% statements, 94.2% branches) + 47 active E2E tests
+- **Test Coverage**: 113 unit tests (79.1% statements, 94.2% branches) + 47 active E2E tests
 - **Build Size**: 404 KB gzipped (1.68 MB uncompressed)
-- **Dependencies**: 5 production, 16 dev (zero critical vulnerabilities)
+- **Dependencies**: 5 production, 17 dev (zero critical vulnerabilities)
 - **Pages**: 6 complete UI pages with full functionality
-- **Performance**: Lazy loading for Firebase SDK, virtual scrolling for large lists
+- **Performance**: 
+  - Lighthouse CI automated monitoring
+  - Lazy loading for Firebase SDK
+  - Virtual scrolling for large lists
+  - Service Worker caching for offline-first
+
+### Recent Enhancements
+- ✅ **Lighthouse CI Integration**: Automated performance monitoring in CI/CD
+- ✅ **Firebase Lazy Loading**: Reduces initial bundle by ~177KB
+- ✅ **Virtual Scrolling**: Handles 1000+ items smoothly
+- ✅ **Comprehensive Documentation**: Browser compatibility and performance guides
 
 ### Phase 1: Core Data Layer
 The core data layer has been implemented with:

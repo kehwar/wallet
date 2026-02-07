@@ -12,6 +12,22 @@ export default defineNuxtConfig({
   
   ssr: false, // Static generation for PWA
   
+  // Build optimizations
+  vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Split vendor libraries
+            'vendor-decimal': ['decimal.js'],
+            'vendor-dexie': ['dexie'],
+            // Firebase is already lazy-loaded
+          }
+        }
+      }
+    }
+  },
+  
   app: {
     baseURL: process.env.NODE_ENV === 'production' ? '/wallet/' : '/',
     head: {
@@ -23,6 +39,11 @@ export default defineNuxtConfig({
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: 'Local-First Personal Finance Wallet' }
+      ],
+      link: [
+        // Preconnect to external domains (if any)
+        { rel: 'dns-prefetch', href: 'https://fonts.googleapis.com' },
+        { rel: 'dns-prefetch', href: 'https://fonts.gstatic.com' }
       ]
     }
   },

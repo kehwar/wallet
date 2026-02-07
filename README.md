@@ -83,10 +83,10 @@ wallet/
 **Phase 6 Nearly Complete: Testing & Optimization** ✅ (92% complete)
 
 ### Quick Stats
-- **Code Base**: ~6,200 lines of TypeScript
-- **Test Coverage**: 106 unit tests (82% statements, 94% branches) + 47 active E2E tests
-- **Build Size**: 403 KB gzipped (1.67 MB uncompressed)
-- **Dependencies**: 5 production, 17 dev (zero critical vulnerabilities)
+- **Code Base**: ~10,370 lines of TypeScript/Vue
+- **Test Coverage**: 106 unit tests (79.1% statements, 94.2% branches) + 47 active E2E tests
+- **Build Size**: 404 KB gzipped (1.68 MB uncompressed)
+- **Dependencies**: 5 production, 16 dev (zero critical vulnerabilities)
 - **Pages**: 6 complete UI pages with full functionality
 - **Performance**: Lazy loading for Firebase SDK, virtual scrolling for large lists
 
@@ -97,7 +97,7 @@ The core data layer has been implemented with:
 - ✅ Database schema with Dexie.js
 - ✅ CRUD operations for all entities
 - ✅ Double-entry validation
-- ✅ Unit tests with 82% statement coverage, 94% branch coverage
+- ✅ Unit tests with 79.1% statement coverage, 94.2% branch coverage
 
 ### Phase 2: Accounting Engine
 The accounting engine has been implemented with:

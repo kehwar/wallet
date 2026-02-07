@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useFirebase } from '../composables/useFirebase'
+import { useFactoryReset } from '../composables/useFactoryReset'
 import type { FirebaseConfig } from '../types/models'
 
 const { initialize, disconnect, validateConfig, testConnection, isInitialized, currentConfig, configError } = useFirebase()
+const { isResetting, resetError, performReset } = useFactoryReset()
 
 // Form state
 const config = reactive<FirebaseConfig>({
@@ -20,6 +22,8 @@ const config = reactive<FirebaseConfig>({
 const isLoading = ref(false)
 const testResult = ref<{ success: boolean, message: string } | null>(null)
 const isSaved = ref(false)
+const showResetConfirmation = ref(false)
+const resetSuccess = ref(false)
 
 // Load saved config on mount
 async function loadSavedConfig() {
@@ -130,6 +134,29 @@ async function handleTestConnection() {
 
 // Load config on mount
 loadSavedConfig()
+
+// Handle factory reset
+async function handleFactoryReset() {
+  showResetConfirmation.value = false
+  const success = await performReset()
+  
+  if (success) {
+    resetSuccess.value = true
+    setTimeout(() => {
+      resetSuccess.value = false
+      // Reload the page to reflect the reset
+      window.location.reload()
+    }, 2000)
+  }
+}
+
+function showResetDialog() {
+  showResetConfirmation.value = true
+}
+
+function cancelReset() {
+  showResetConfirmation.value = false
+}
 </script>
 
 <template>
@@ -306,6 +333,77 @@ v-if="testResult" :class="[
           <strong>Important:</strong> Configure Firestore security rules to protect your data.
           See <a href="/docs/firestore-security-rules" class="underline">documentation</a> for examples.
         </p>
+      </div>
+    </div>
+
+    <!-- Factory Reset Section -->
+    <div class="mt-8 p-6 bg-red-50 border border-red-200 rounded-lg">
+      <h2 class="text-lg font-semibold text-red-900 mb-3">⚠️ Danger Zone</h2>
+      <p class="text-sm text-red-700 mb-4">
+        Reset all data to factory settings. This will delete all accounts, transactions, and budgets, 
+        and create new default accounts with example transactions.
+      </p>
+      
+      <!-- Reset Success Message -->
+      <div v-if="resetSuccess" class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <p class="text-sm text-green-800">
+          ✓ Factory reset completed successfully! Reloading...
+        </p>
+      </div>
+      
+      <!-- Reset Error Message -->
+      <div v-if="resetError" class="mb-4 p-4 bg-red-100 border border-red-300 rounded-lg">
+        <p class="text-sm text-red-900">
+          ✗ Error: {{ resetError }}
+        </p>
+      </div>
+      
+      <button
+        type="button"
+        :disabled="isResetting"
+        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+        @click="showResetDialog"
+      >
+        {{ isResetting ? 'Resetting...' : 'Reset to Factory Settings' }}
+      </button>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div
+      v-if="showResetConfirmation"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      @click.self="cancelReset"
+    >
+      <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Confirm Factory Reset</h3>
+        <p class="text-gray-700 mb-6">
+          Are you sure you want to reset all data? This action cannot be undone.
+          <br><br>
+          <strong>This will:</strong>
+        </p>
+        <ul class="list-disc list-inside text-sm text-gray-700 mb-6 space-y-1">
+          <li>Delete all existing accounts</li>
+          <li>Delete all transactions</li>
+          <li>Delete all budgets</li>
+          <li>Create new default accounts (Cash, Bank, Income, Expense)</li>
+          <li>Create example transactions</li>
+        </ul>
+        <div class="flex gap-3">
+          <button
+            type="button"
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            @click="cancelReset"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            @click="handleFactoryReset"
+          >
+            Reset All Data
+          </button>
+        </div>
       </div>
     </div>
   </div></AppLayout>
